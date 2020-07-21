@@ -25,13 +25,23 @@
       >
         <div class="flex-box flex-direction-row">
           <div>
-          <span style="color:black;width: 115px;margin-top: 16px;margin-left: 32px;font-size: 23px;">生产线：</span>
-          <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+            <span
+              style="color:black;width: 115px;margin-top: 16px;margin-left: 32px;font-size: 23px;"
+            >生产线：</span>
+            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
           </div>
           <div>
-          <p  style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;">生产日期：</p>
-          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 100%;" :value-format="'yyyy-MM-dd'">
-          </el-date-picker>
+            <p
+              style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;"
+            >生产日期：</p>
+            <el-date-picker
+              class="el-input"
+              v-model="params.executionTime"
+              type="date"
+              placeholder="选择日期"
+              style="width: 100%;"
+              :value-format="'yyyy-MM-dd'"
+            ></el-date-picker>
           </div>
         </div>
         <!-- 表头内容 -->
@@ -42,9 +52,12 @@
           <div class="data-header-operation"></div>
         </div>
         <!-- 表格内容 -->
-        <div class="flex-box data-content flex-direction-column" style="width:100%; height:612px">
+        <div class="flex-box data-content flex-direction-column" style="width:100%; height:11.5%;">
           <div v-for="(item) in callPlans" :key="item.id">
-             <div class="data-content-produce-row flex-box flex-align-items-center" :id="'a'+item.id">
+            <div
+              class="data-content-produce-row flex-box flex-align-items-center"
+              :id="'a'+item.id"
+            >
               <div
                 class="data-name"
               >{{item.materialName+" （"+item.productLineCode+"）"+item.executionTime+" 【总共"+item.waveModels.length+"条】"}}</div>
@@ -52,7 +65,12 @@
               <div class="bom-done"></div>
               <div class="data-content-produce-operation flex-box flex-align-items-center"></div>
             </div>
-             <div :id="'waveModel'+item.id" class="data-wave" v-for="(wave,index) in item.waveModels" :key="wave.id">
+            <div
+              :id="'waveModel'+item.id"
+              class="data-wave"
+              v-for="(wave,index) in item.waveModels"
+              :key="wave.id"
+            >
               <div class="data-content-wave-row flex-box flex-align-items-center" v-if="index < 5">
                 <div class="wave-name">{{'波次' + (index + 1)}}</div>
                 <div class="bom-num"></div>
@@ -103,197 +121,196 @@
 
 <style scoped>
 .flex-direction-row {
-    -webkit-box-orient: horizontal;
-    background: #f4e9e9;
-    height: 60px;
+  -webkit-box-orient: horizontal;
+  background: #f4e9e9;
+  height: 60px;
 }
 .el-select {
-    display: inline-block;
-    position: relative;
-    margin-top: 12px;
+  display: inline-block;
+  position: relative;
+  margin-top: 12px;
 }
-.el-input{
-    transition: all .3s;
-    height: 10px;
-    width: 80%;
-    width: 100%;
-    margin-top: 24px;
-    margin-left: 142px;
+.el-input {
+  transition: all 0.3s;
+  height: 10px;
+  width: 80%;
+  width: 100%;
+  margin-top: 24px;
+  margin-left: 142px;
 }
 </style>
 
 <script>
-  import '../../product/home/home.scss';
-  import './call.scss';
-  import request from '@/utils/request';
-  // import Constants from '@/utils/constants';
-  import SelectIndex from '@/components/Select/index'
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import '../../product/home/home.scss';
+import './call.scss';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+import SelectIndex from '@/components/Select/index';
+import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'call',
-    components: {SelectIndex},
-    created() {
-      this.loadingInfo();
-    },
-        mounted() {
-      console.log("*****",this.gas)
-    },
-    data() {
-      return {
-        num: '99+',
-        state: {},
-        // 加载对象
-        load: null,
-        callPlans: [],
-        params:{
-            waveType: 1,
-            callType: 3
-        },
-        gas:this.$store.state.msk
-      };
-    },
-    methods: {
-      loadingInfo() {
-        this.$store.dispatch('updateTitle', '消毒间叫料');
-        this.$store.dispatch('updateNeedLogin', false);
-        this.timer();
+export default {
+  name: 'call',
+  components: { SelectIndex },
+  created() {
+    this.loadingInfo();
+  },
+  mounted() {
+    console.log('*****', this.gas);
+  },
+  data() {
+    return {
+      num: '99+',
+      state: {},
+      // 加载对象
+      load: null,
+      callPlans: [],
+      params: {
+        waveType: 1,
+        callType: 3
       },
-      isEmpty,
-      // 跳转
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {},
-      timer() {
+      gas: this.$store.state.msk
+    };
+  },
+  methods: {
+    loadingInfo() {
+      this.$store.dispatch('updateTitle', '消毒间叫料');
+      this.$store.dispatch('updateNeedLogin', false);
+      this.timer();
+    },
+    isEmpty,
+    // 跳转
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    toggleShow() {},
+    timer() {
+      this.getCallPlans();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
         this.getCallPlans();
-        if (this.timer) {
-          clearInterval(this.timer);
-        }
-        this.timer = setInterval(() => {
-          this.getCallPlans();
-      var uio= document.getElementById("a1182");
-      console.log("444444", uio, document)
-uio.scrollTop = uio.scrollHeight;
-        }, 5000);
-      },
-      // 叫波次
-      callWave(wave) {
-        if (!isEmpty(wave.waveDetailModels) && wave.waveDetailModels.length > 0) {
-          wave.waveDetailModels.forEach(item => {
-            item.areaType = 3;
-          });
-        }
-        this.load = this.showErrorMessage('叫料中，请稍候......');
-        request({
-          url: '/agv/callMaterials/addWaveDetailCallMaterials',
-          method: 'POST',
-          data: wave.waveDetailModels
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getCallPlans();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 叫详情
-      callBom(bom) {
-        const callBoms = [];
-        if (!isEmpty(bom)) {
-          bom.areaType = 3;
-          callBoms.push(bom);
-        }
-        this.load = this.showErrorMessage('叫料中，请稍后');
-        request({
-          url: '/agv/callMaterials/addWaveDetailCallMaterials',
-          method: 'POST',
-          data: callBoms
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getCallPlans();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 波次取消叫料
-      cancelWave(wave) {
-        this.load = this.showErrorMessage('正在取消，请稍后');
-        request({
-          url: '/agv/callMaterials/cancelWave',
-          method: 'POST',
-          params: {
-            waveCode: wave.code
+        var uio = document.getElementById('a1182');
+        console.log('444444', uio, document);
+        uio.scrollTop = uio.scrollHeight;
+      }, 5000);
+    },
+    // 叫波次
+    callWave(wave) {
+      if (!isEmpty(wave.waveDetailModels) && wave.waveDetailModels.length > 0) {
+        wave.waveDetailModels.forEach(item => {
+          item.areaType = 3;
+        });
+      }
+      this.load = this.showErrorMessage('叫料中，请稍候......');
+      request({
+        url: '/agv/callMaterials/addWaveDetailCallMaterials',
+        method: 'POST',
+        data: wave.waveDetailModels
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getCallPlans();
           }
         })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getCallPlans();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 获取叫料计划
-      getCallPlans() {
-        request({
-          url: '/agv/waves/callPlans',
-          method: 'GET',
-          params: this.params
-        })
-          .then(response => {
-            console.log(response)
-            if (response.errno === 0) {
-              this.callPlans = response.data;
-            }
-            
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 叫详情
+    callBom(bom) {
+      const callBoms = [];
+      if (!isEmpty(bom)) {
+        bom.areaType = 3;
+        callBoms.push(bom);
       }
+      this.load = this.showErrorMessage('叫料中，请稍后');
+      request({
+        url: '/agv/callMaterials/addWaveDetailCallMaterials',
+        method: 'POST',
+        data: callBoms
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getCallPlans();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 波次取消叫料
+    cancelWave(wave) {
+      this.load = this.showErrorMessage('正在取消，请稍后');
+      request({
+        url: '/agv/callMaterials/cancelWave',
+        method: 'POST',
+        params: {
+          waveCode: wave.code
+        }
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getCallPlans();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 获取叫料计划
+    getCallPlans() {
+      request({
+        url: '/agv/waves/callPlans',
+        method: 'GET',
+        params: this.params
+      })
+        .then(response => {
+          console.log(response);
+          if (response.errno === 0) {
+            this.callPlans = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>

@@ -35,17 +35,25 @@
             class="btn btn-default btn-click flex-box flex-justify-content-center flex-align-items-center"
             @click="showUnFinish()"
           >未完成</div>
-        <div class="flex-box flex-direction-row">
+          <div class="flex-box flex-direction-row">
             <div>
-            <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+              <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
+              <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
             </div>
             <div>
-            <p  style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;">生产日期：</p>
-            <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 100%;" :value-format="'yyyy-MM-dd'">
-            </el-date-picker>
+              <p
+                style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;"
+              >生产日期：</p>
+              <el-date-picker
+                class="el-input"
+                v-model="params.executionTime"
+                type="date"
+                placeholder="选择日期"
+                style="width: 100%;"
+                :value-format="'yyyy-MM-dd'"
+              ></el-date-picker>
             </div>
-        </div>
+          </div>
           <!-- <div
             class="btn btn-default btn-add flex-box flex-justify-content-center flex-align-items-center"
             @click="addWave()"
@@ -141,264 +149,264 @@
 
 <style scoped>
 .flex-direction-row {
-    -webkit-box-orient: horizontal;
-    background: #f4e9e9;
-    height: 60px;
+  -webkit-box-orient: horizontal;
+  background: #f4e9e9;
+  height: 60px;
 }
 .el-select {
-    display: inline-block;
-    position: relative;
-    margin-top: 12px;
+  display: inline-block;
+  position: relative;
+  margin-top: 12px;
 }
-.el-input{
-    margin-top: 24px;
-    margin-left: 130px;
+.el-input {
+  margin-top: 24px;
+  margin-left: 130px;
 }
 </style>
 
 <script>
-  import './home.scss';
-  import TaskOut from './changeLine';
-  import EditBom from './editBom';
-  import AddBom from './addBom';
-  import request from '@/utils/request';
-  import Constants from '@/utils/constants';
-  import SelectIndex from '@/components/Select/index'
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import './home.scss';
+import TaskOut from './changeLine';
+import EditBom from './editBom';
+import AddBom from './addBom';
+import request from '@/utils/request';
+import Constants from '@/utils/constants';
+import SelectIndex from '@/components/Select/index';
+import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  const areaTypeString = process.env.AREA_TYPE;
-  // 配送管理
-  export default {
-    name: 'home',
-    components: { EditBom, AddBom, TaskOut ,SelectIndex },
-    created() {
-      this.loadingInfo();
+const areaTypeString = process.env.AREA_TYPE;
+// 配送管理
+export default {
+  name: 'home',
+  components: { EditBom, AddBom, TaskOut, SelectIndex },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      state: {
+        editBomVisible: false,
+        addBomVisible: false,
+        changeLineVisible: false
+      },
+      // 加载对象
+      load: null,
+      editBom: null,
+      addBomWave: null,
+      waves: [],
+      waveState: 0,
+      teamId: '',
+      areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
+      auth: 'user',
+      changeLineProduct: null,
+      changeLinePositionName: '',
+      params: {}
+    };
+  },
+  methods: {
+    loadingInfo() {
+      this.teamId = this.$store.state.AgvHeader.teamId;
+      this.auth = this.$store.state.AgvHeader.auth;
+      this.formateAreaType();
+      this.timer();
     },
-    data() {
-      return {
-        state: {
-          editBomVisible: false,
-          addBomVisible: false,
-          changeLineVisible: false
-        },
-        // 加载对象
-        load: null,
-        editBom: null,
-        addBomWave: null,
-        waves: [],
-        waveState: 0,
-        teamId: '',
-        areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
-        auth: 'user',
-        changeLineProduct: null,
-        changeLinePositionName: '',
-        params: {},
-      };
-    },
-    methods: {
-      loadingInfo() {
-        this.teamId = this.$store.state.AgvHeader.teamId;
-        this.auth = this.$store.state.AgvHeader.auth;
-        this.formateAreaType();
-        this.timer();
-      },
-      formateAreaType() {
-        if (areaTypeString === 'filling') {
-          this.areaType = 1;
-          this.$store.dispatch('updateTitle', '灌装区配送管理');
-        } else if (areaTypeString === 'packing') {
-          this.areaType = 2;
-          this.$store.dispatch('updateTitle', '包装区配送管理');
-        }
-      },
-      timer() {
-        this.getWaves();
-        if (this.timer) {
-          clearInterval(this.timer);
-        }
-        this.timer = setInterval(() => {
-          this.getWaves();
-        }, 5000);
-      },
-      showAll() {
-        this.waveState = null;
-        this.getWaves();
-      },
-      showUnFinish() {
-        this.waveState = 0;
-        this.getWaves();
-      },
-      // 跳转到指定页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      // 删除原料 -删除完后需要刷新
-      deleteBom(bomId) {
-        this.load = this.showErrorMessage('删除中,请稍后...');
-        request({
-          url: '/agv/waves/deleteDetail/' + bomId,
-          method: 'DELETE'
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getWaves();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 修改原料信息
-      updateBom(bom) {
-        this.editBom = bom;
-        this.state.editBomVisible = true;
-      },
-      addBom(wave) {
-        this.addBomWave = wave;
-        this.state.addBomVisible = true;
-      },
-      // 删除波次
-      deleteWave(wave) {
-        this.load = this.showErrorMessage('删除中,请稍后...');
-        request({
-          url: '/agv/waves/deleteWave',
-          method: 'DELETE',
-          params: {
-            waveCode: wave.code
-          }
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getWaves();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 删除产品
-      deleteProduce(produce) {
-        this.load = this.showErrorMessage('删除中,请稍后...');
-        request({
-          url: '/agv/waves/deleteWaves',
-          method: 'DELETE',
-          data: produce
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getWaves();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 根据产品 增加一个波次
-      addWave(produce) {
-        // 如果遮罩层存在
-        if (!isEmpty(this.load)) {
-          this.load.close();
-        }
-        this.load = this.showErrorMessage('新增中,请稍后...');
-        request({
-          url: '/agv/waves',
-          method: 'POST',
-          data: produce
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getWaves();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      changeLine(product) {
-        console.log(product);
-        this.changeLineProduct = product;
-        this.changeLinePositionName = product.materialName;
-        this.state.changeLineVisible = true;
-      },
-      toggleShow() {
-        this.state.editBomVisible = false;
-        this.state.addBomVisible = false;
-        this.state.changeLineVisible = false;
-      },
-      getWaves() {
-        request({
-          url: '/agv/waves',
-          method: 'GET',
-          params: {
-            type: this.areaType,
-            teamId: this.teamId,
-            state: this.waveState,
-            ...this.params
-          }
-        })
-          .then(response => {
-            if (response.errno === 0) {
-              this.waves = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      // 格式化状态
-      formateState(waveState) {
-        let stateName = '';
-        Constants.waveState.forEach(item => {
-          if (item.value === waveState) {
-            stateName = item.label;
-          }
-        });
-        return stateName;
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
+    formateAreaType() {
+      if (areaTypeString === 'filling') {
+        this.areaType = 1;
+        this.$store.dispatch('updateTitle', '灌装区配送管理');
+      } else if (areaTypeString === 'packing') {
+        this.areaType = 2;
+        this.$store.dispatch('updateTitle', '包装区配送管理');
       }
+    },
+    timer() {
+      this.getWaves();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
+        this.getWaves();
+      }, 5000);
+    },
+    showAll() {
+      this.waveState = null;
+      this.getWaves();
+    },
+    showUnFinish() {
+      this.waveState = 0;
+      this.getWaves();
+    },
+    // 跳转到指定页面
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    // 删除原料 -删除完后需要刷新
+    deleteBom(bomId) {
+      this.load = this.showErrorMessage('删除中,请稍后...');
+      request({
+        url: '/agv/waves/deleteDetail/' + bomId,
+        method: 'DELETE'
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getWaves();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 修改原料信息
+    updateBom(bom) {
+      this.editBom = bom;
+      this.state.editBomVisible = true;
+    },
+    addBom(wave) {
+      this.addBomWave = wave;
+      this.state.addBomVisible = true;
+    },
+    // 删除波次
+    deleteWave(wave) {
+      this.load = this.showErrorMessage('删除中,请稍后...');
+      request({
+        url: '/agv/waves/deleteWave',
+        method: 'DELETE',
+        params: {
+          waveCode: wave.code
+        }
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getWaves();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 删除产品
+    deleteProduce(produce) {
+      this.load = this.showErrorMessage('删除中,请稍后...');
+      request({
+        url: '/agv/waves/deleteWaves',
+        method: 'DELETE',
+        data: produce
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getWaves();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 根据产品 增加一个波次
+    addWave(produce) {
+      // 如果遮罩层存在
+      if (!isEmpty(this.load)) {
+        this.load.close();
+      }
+      this.load = this.showErrorMessage('新增中,请稍后...');
+      request({
+        url: '/agv/waves',
+        method: 'POST',
+        data: produce
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getWaves();
+          }
+        })
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    changeLine(product) {
+      console.log(product);
+      this.changeLineProduct = product;
+      this.changeLinePositionName = product.materialName;
+      this.state.changeLineVisible = true;
+    },
+    toggleShow() {
+      this.state.editBomVisible = false;
+      this.state.addBomVisible = false;
+      this.state.changeLineVisible = false;
+    },
+    getWaves() {
+      request({
+        url: '/agv/waves',
+        method: 'GET',
+        params: {
+          type: this.areaType,
+          teamId: this.teamId,
+          state: this.waveState,
+          ...this.params
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.waves = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    // 格式化状态
+    formateState(waveState) {
+      let stateName = '';
+      Constants.waveState.forEach(item => {
+        if (item.value === waveState) {
+          stateName = item.label;
+        }
+      });
+      return stateName;
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>

@@ -25,12 +25,18 @@
           <div class="task-list-title">配送任务</div>
           <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
             <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
           </div>
           <div style="width: 71%;    margin-left: 182px">
-            <span  style="color:black;font-size: 16px;">日期：</span>
-          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 50%;" :value-format="'yyyy-MM-dd'">
-          </el-date-picker>
+            <span style="color:black;font-size: 16px;">日期：</span>
+            <el-date-picker
+              class="el-input"
+              v-model="params.executionTime"
+              type="date"
+              placeholder="选择日期"
+              style="width: 50%;"
+              :value-format="'yyyy-MM-dd'"
+            ></el-date-picker>
           </div>
           <div style="overflow:auto; overflow-x:visible;">
             <div v-for="(item) in tasks" :key="item.id">
@@ -62,6 +68,8 @@
         </div>
       </div>
     </div>
+    <el-button id="playButton" hidden @click="playMusic"></el-button>
+    <audio id="promptTone" src="../static/voices/newTask.mp3" preload="auto"></audio>
     <el-dialog
       v-if="state.taskOutVisible"
       :visible.sync="state.taskOutVisible"
@@ -76,19 +84,19 @@
 
 <style scoped>
 .flex-direction-row {
-    -webkit-box-orient: horizontal;
-    background: #f4e9e9;
-    height: 60px;
+  -webkit-box-orient: horizontal;
+  background: #f4e9e9;
+  height: 60px;
 }
 .el-select {
-    display: inline-block;
-    position: relative;
-    /* margin-top: 12px; */
-    margin-left: -10px;
-    width: 109px;
+  display: inline-block;
+  position: relative;
+  /* margin-top: 12px; */
+  margin-left: -10px;
+  width: 109px;
 }
-.el-input{
-    transition: all .3s;
+.el-input {
+  transition: all 0.3s;
 }
 </style>
 
@@ -97,14 +105,14 @@ import '../../product/home/home.scss';
 import './task.scss';
 import TaskOut from './taskOut';
 import request from '@/utils/request';
-import SelectIndex from '@/components/Select/index'
+import SelectIndex from '@/components/Select/index';
 // import Constants from '@/utils/constants';
-// import { isEmpty } from '@/utils/helper';
+import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
 export default {
   name: 'home',
-  components: { TaskOut ,SelectIndex },
+  components: { TaskOut, SelectIndex },
   created() {
     this.loadingInfo();
   },
@@ -115,22 +123,31 @@ export default {
       },
       // 加载对象
       load: null,
-      params:{
-            type: 1,
-            state: 1
+      params: {
+        type: 1,
+        state: 1
       },
       sites: [],
       tasks: [],
       taskOutPositionName: '',
       taskOutBom: null,
-      msk:10
+      msk: 10
     };
   },
   watch: {
     tasks: {
       deep: true,
-      handler(oldVal, newVal) {
-        console.log('tasks: ', oldVal, newVal);
+      handler(newVal, oldVal) {
+        if (!isEmpty(newVal) && !isEmpty(oldVal)) {
+          if (newVal.length > oldVal.length) {
+            document.getElementById('playButton').click();
+          }
+        } else if (isEmpty(oldVal)) {
+          if (!isEmpty(newVal) && newVal.length > 0) {
+            document.getElementById('playButton').click();
+          }
+        }
+        console.log('watch中的tasks: ', oldVal, newVal);
       }
     }
   },
@@ -144,10 +161,10 @@ export default {
     turn(url) {
       this.$router.push({ path: url });
     },
-    run(ho){
-         this.$store.dispatch('riseValue',ho)
-         this.$router.push({ path: '/disinfection/call' });
-      },
+    run(ho) {
+      this.$store.dispatch('riseValue', ho);
+      this.$router.push({ path: '/disinfection/call' });
+    },
     toggleShow() {
       this.state.taskOutVisible = false;
     },
@@ -209,6 +226,11 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       };
       return Loading.service(options);
+    },
+    // 播放提示音
+    playMusic() {
+      const buttonAudio = document.getElementById('promptTone');
+      buttonAudio.play();
     }
   }
 };

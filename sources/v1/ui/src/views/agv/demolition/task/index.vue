@@ -63,6 +63,8 @@
         </div>
       </div>
     </div>
+    <el-button id="playButton" hidden @click="playMusic"></el-button>
+    <audio id="promptTone" src="../static/voices/newTask.mp3" preload="auto"></audio>
     <el-dialog
       v-if="state.taskOutVisible"
       :visible.sync="state.taskOutVisible"
@@ -101,6 +103,22 @@ export default {
       taskOutPositionName: '',
       taskOutBom: null
     };
+  },
+  watch: {
+    tasks: {
+      deep: true,
+      handler(newVal, oldVal) {
+        if (!isEmpty(newVal) && !isEmpty(oldVal)) {
+          if (newVal.length > oldVal.length) {
+            document.getElementById('playButton').click();
+          }
+        } else if (isEmpty(oldVal)) {
+          if (!isEmpty(newVal) && newVal.length > 0) {
+            document.getElementById('playButton').click();
+          }
+        }
+      }
+    }
   },
   methods: {
     loadingInfo() {
@@ -243,6 +261,11 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       };
       return Loading.service(options);
+    },
+    // 播放提示音
+    playMusic() {
+      const buttonAudio = document.getElementById('promptTone');
+      buttonAudio.play();
     }
   }
 };

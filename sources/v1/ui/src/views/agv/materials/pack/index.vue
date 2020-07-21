@@ -28,12 +28,18 @@
           <div class="task-list-title">配送任务</div>
           <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
             <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
           </div>
           <div style="width: 71%;    margin-left: 182px">
-            <span  style="color:black;font-size: 16px;">日期：</span>
-          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 50%;" :value-format="'yyyy-MM-dd'">
-          </el-date-picker>
+            <span style="color:black;font-size: 16px;">日期：</span>
+            <el-date-picker
+              class="el-input"
+              v-model="params.executionTime"
+              type="date"
+              placeholder="选择日期"
+              style="width: 50%;"
+              :value-format="'yyyy-MM-dd'"
+            ></el-date-picker>
           </div>
           <div style="overflow:auto; overflow-x:visible;">
             <div v-for="(item) in tasks" :key="item.id">
@@ -80,138 +86,138 @@
 
 <style scoped>
 .flex-direction-row {
-    -webkit-box-orient: horizontal;
-    background: #f4e9e9;
-    height: 60px;
+  -webkit-box-orient: horizontal;
+  background: #f4e9e9;
+  height: 60px;
 }
 .el-select {
-    display: inline-block;
-    position: relative;
-    /* margin-top: 12px; */
-    margin-left: -10px;
-    width: 109px;
+  display: inline-block;
+  position: relative;
+  /* margin-top: 12px; */
+  margin-left: -10px;
+  width: 109px;
 }
-.el-input{
-    transition: all .3s;
+.el-input {
+  transition: all 0.3s;
 }
 </style>
 
 <script>
-  import '../../product/home/home.scss';
-  import './task.scss';
-  import TaskOut from './taskOut';
-  import request from '@/utils/request';
-  import SelectIndex from '@/components/Select/index'
-  // import Constants from '@/utils/constants';
-  // import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import '../../product/home/home.scss';
+import './task.scss';
+import TaskOut from './taskOut';
+import request from '@/utils/request';
+import SelectIndex from '@/components/Select/index';
+// import Constants from '@/utils/constants';
+// import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'home',
-    components: { TaskOut, SelectIndex },
-    created() {
-      this.loadingInfo();
+export default {
+  name: 'home',
+  components: { TaskOut, SelectIndex },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      num: '99+',
+      state: {
+        taskOutVisible: false
+      },
+      // 加载对象
+      load: null,
+      params: {},
+      sites: [],
+      tasks: [],
+      taskOutPositionName: '',
+      taskOutBom: null
+    };
+  },
+  methods: {
+    loadingInfo() {
+      this.$store.dispatch('updateTitle', '包材仓配货任务');
+      this.$store.dispatch('updateNeedLogin', false);
+      this.timer();
     },
-    data() {
-      return {
-        num: '99+',
-        state: {
-          taskOutVisible: false
-        },
-        // 加载对象
-        load: null,
-        params:{},
-        sites: [],
-        tasks: [],
-        taskOutPositionName: '',
-        taskOutBom: null
-      };
+    // 跳转到配送管理页面
+    turn(url) {
+      this.$router.push({ path: url });
     },
-    methods: {
-      loadingInfo() {
-        this.$store.dispatch('updateTitle', '包材仓配货任务');
-        this.$store.dispatch('updateNeedLogin', false);
-        this.timer();
-      },
-      // 跳转到配送管理页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {
-        this.state.taskOutVisible = false;
-      },
-      timer() {
+    toggleShow() {
+      this.state.taskOutVisible = false;
+    },
+    timer() {
+      this.getSites();
+      this.getDistributionTasks();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
         this.getSites();
         this.getDistributionTasks();
-        if (this.timer) {
-          clearInterval(this.timer);
+      }, 5000);
+    },
+    taskOut(bom) {
+      this.taskOutBom = bom;
+      this.taskOutPositionName = bom.name;
+      this.state.taskOutVisible = true;
+    },
+    getSites() {
+      request({
+        url: '/agv/sites',
+        method: 'GET',
+        params: {
+          type: 6
         }
-        this.timer = setInterval(() => {
-          this.getSites();
-          this.getDistributionTasks();
-        }, 5000);
-      },
-      taskOut(bom) {
-        this.taskOutBom = bom;
-        this.taskOutPositionName = bom.name;
-        this.state.taskOutVisible = true;
-      },
-      getSites() {
-        request({
-          url: '/agv/sites',
-          method: 'GET',
-          params: {
-            type: 6
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.sites = response.data;
           }
         })
-          .then(response => {
-            if (response.errno === 0) {
-              this.sites = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      getDistributionTasks() {
-        request({
-          // url: '/agv/callMaterials/distributionTasks',
-          url: '/agv/callMaterials/selectWarehouseTask',
-          method: 'GET',
-          params: this.params
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    getDistributionTasks() {
+      request({
+        // url: '/agv/callMaterials/distributionTasks',
+        url: '/agv/callMaterials/selectWarehouseTask',
+        method: 'GET',
+        params: this.params
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.tasks = response.data;
+          }
         })
-          .then(response => {
-            if (response.errno === 0) {
-              this.tasks = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      formatShowName(item) {
-        const showName = '';
-        // if (
-        //   !isEmpty(item.materialBoxMaterialModels) &&
-        //   item.materialBoxMaterialModels.length > 0
-        // ) {
-        //   item.materialBoxMaterialModels.forEach(obj => {
-        //     showName += obj.materialName + ' ' + obj.count + ' \n';
-        //   });
-        // }
-        return showName;
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
-      }
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    formatShowName(item) {
+      const showName = '';
+      // if (
+      //   !isEmpty(item.materialBoxMaterialModels) &&
+      //   item.materialBoxMaterialModels.length > 0
+      // ) {
+      //   item.materialBoxMaterialModels.forEach(obj => {
+      //     showName += obj.materialName + ' ' + obj.count + ' \n';
+      //   });
+      // }
+      return showName;
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>
