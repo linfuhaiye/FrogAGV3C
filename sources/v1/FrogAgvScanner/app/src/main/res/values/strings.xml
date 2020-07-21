@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">青蛙王子AGV</string>
+    <string name="material_name">产品名称:</string>
+    <string name="choose_material">选择产品</string>
+    <string name="material_car_name">料车ID:</string>
+    <string name="scan_material_car">扫描料车</string>
+    <string name="land_mask_name">地标ID:</string>
+    <string name="scan_land_mask">扫描地标</string>
+    <string name="commit">提交</string>
+    <string name="detail">详情</string>
+</resources>

@@ -1,0 +1,93 @@
+.task-list-box {
+  width: 580px;
+  background-color: #d99694;
+  margin-bottom: 10px;
+  .task-list-title {
+    font-size: 25px;
+    text-align: center;
+    height: 40px;
+    line-height: 40px;
+  }
+  .task-list-name {
+    margin-left: 30px;
+    font-size: 18px;
+    color: #17375e;
+    margin-top: 5px;
+  }
+  .task-list-bom-name {
+    margin-left: 50px;
+    font-size: 15px;
+    color: #ffffff;
+  }
+  .task-list-bom-num {
+    margin-left: 5px;
+    font-size: 18px;
+    color: #ffffff;
+  }
+}
+
+.task-content {
+  width: 100%;
+  background-color: #e8d0d0;
+  margin-bottom: 10px;
+  .title {
+    font-size: 25px;
+    text-align: center;
+    height: 40px;
+    line-height: 40px;
+  }
+  .position-box {
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-bottom: 50px;
+    .position {
+      width: 100%;
+      height: 150px;
+      border: 3px solid #ffffff;
+      margin-top: 15px;
+      color: #ffffff;
+      text-align: center;
+      line-height: 150px;
+    }
+    .position-pointer {
+      cursor: pointer;
+      background-color: #92d050;
+    }
+  }
+}
+
+.site-item {
+  width: 160px;
+  margin-left: 50px;
+  text-align: center;
+}
+
+.site-item-name {
+  margin-top: 10px;
+}
+
+.out-item {
+  margin-bottom: 20px;
+  line-height: 35px;
+  .title {
+    font-size: 30px;
+    font-weight: 600;
+  }
+  .content {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  .item-right {
+    width: 260px;
+  }
+  .el-input--medium .el-input__inner {
+    height: 45px;
+    line-height: 45px;
+  }
+  .el-table .cell {
+    font-size: 22px;
+    height: 38px;
+    line-height: 38px;
+    text-align: center;
+  }
+}

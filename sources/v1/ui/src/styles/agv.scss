@@ -1,0 +1,114 @@
+.frog-table .el-table__header > thead > tr > th {
+  background-color: #9ec544;
+  color: #ffffff;
+}
+.table-body-background {
+  background-color: #2784aa;
+}
+
+.frog-table > div {
+  background-color: #ffffff;
+}
+
+.frog-table .el-pagination {
+  padding: 5px 5px;
+}
+
+.frog-table .batch-save-btn,
+.frog-table .batch-add-btn,
+.frog-table .batch-refresh-btn {
+  margin-right: 10px;
+  float: right;
+  margin-bottom: 10px;
+  margin-top: -9px;
+}
+
+.frog-table .filter-container {
+  height: 30px;
+  background-color: #2784aa;
+}
+
+.frog-table .fetch-item {
+  margin-bottom: 10px;
+  margin-top: -10px;
+}
+
+.frog-table thead > tr > th > .cell {
+  line-height: 23px;
+}
+
+.frog-table .filter-container .filter-item {
+  margin-bottom: 0px;
+}
+
+.disable-display {
+  display: none;
+}
+
+.setting {
+  .dialog-height {
+    height: calc(100vh - 250px);
+    overflow-y: auto;
+    position: relative;
+    .data-content {
+      height: calc(100vh - 430px);
+    }
+  }
+  .agv-dialog .el-input--medium .el-input__inner {
+    height: 40px;
+    line-height: 40px;
+  }
+}
+.agv-dialog {
+  .dialog-header {
+    font-size: 30px;
+    height: 56px;
+    line-height: 56px;
+  }
+  .el-table .cell {
+    font-size: 20px;
+    min-height: 22px;
+    line-height: normal;
+    text-align: center;
+  }
+  .agv-dialog-row {
+    margin-top: 10px;
+    .agv-dialog-label {
+      font-size: 30px;
+      height: 56px;
+      line-height: 56px;
+      text-align: center;
+    }
+  }
+  .el-input--medium {
+    font-size: 30px;
+  }
+  .el-input--medium .el-input__inner {
+    height: 56px;
+    line-height: 56px;
+  }
+  .el-form-item--medium .el-form-item__content,
+  .el-form-item--medium .el-form-item__label {
+    line-height: 56px;
+  }
+  .el-form-item__label {
+    font-size: 30px;
+  }
+  .dialog-footer {
+    margin-top: 30px;
+  }
+  .dialog-cancel-btn {
+    width: 100px;
+    height: 40px;
+    text-align: center;
+    font-size: 24px;
+    background-color: #558ed5;
+  }
+  .dialog-update-btn {
+    width: 100px;
+    height: 40px;
+    text-align: center;
+    font-size: 24px;
+    background-color: #c00000;
+  }
+}

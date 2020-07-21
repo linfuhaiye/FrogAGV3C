@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" id="圖層_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="3380.93px" height="376.194px" viewBox="0 0 3380.93 376.194" enable-background="new 0 0 3380.93 376.194"
+	 xml:space="preserve">
+<g>
+	<defs>
+		<rect id="SVGID_1_" width="3380.93" height="376.194"/>
+	</defs>
+	<clipPath id="SVGID_2_">
+		<use xlink:href="#SVGID_1_"  overflow="visible"/>
+	</clipPath>
+	<g clip-path="url(#SVGID_2_)">
+		<defs>
+			<rect id="SVGID_3_" width="3380.927" height="376.194"/>
+		</defs>
+		<clipPath id="SVGID_4_">
+			<use xlink:href="#SVGID_3_"  overflow="visible"/>
+		</clipPath>
+		<g opacity="0.2" clip-path="url(#SVGID_4_)">
+			<g>
+				<defs>
+					<rect id="SVGID_5_" y="15.142" width="3380.93" height="361.052"/>
+				</defs>
+				<clipPath id="SVGID_6_">
+					<use xlink:href="#SVGID_5_"  overflow="visible"/>
+				</clipPath>
+				<path clip-path="url(#SVGID_6_)" fill="#196BE5" d="M1920,145.547c-28.412-26.037-53.587-46.477-73.983-64.377
+					c-57.517-50.477-99.612-59.913-118.684-62.977c-79.333-13-150.698,17.704-201.354,51.097
+					c-47.446,31.277-92.584,69.552-92.584,69.552c-92.145,74.602-126.062,89.684-126.062,89.684
+					c-220,106.667-307.833,70.167-484,18.668c-260.439-76.136-348.766-38.182-408-13.334c-101.382,42.53-101.382,42.53-149,61.333
+					C147.541,342.103,48.693,338.053,0,341.648v34.545h1920V145.547z"/>
+				<path clip-path="url(#SVGID_6_)" fill="#196BE5" d="M1460.927,145.547c28.413-26.037,53.587-46.477,73.983-64.377
+					c57.517-50.477,99.613-59.913,118.684-62.977c79.333-13,150.699,17.704,201.354,51.097
+					c47.446,31.277,92.584,69.552,92.584,69.552c92.146,74.602,126.063,89.684,126.063,89.684
+					c220,106.667,307.833,70.167,484,18.668c260.439-76.136,348.767-38.182,408-13.334c101.382,42.53,101.382,42.53,149,61.333
+					c118.793,46.91,217.641,42.86,266.333,46.455v34.545h-1920V145.547z"/>
+			</g>
+		</g>
+	</g>
+</g>
+</svg>

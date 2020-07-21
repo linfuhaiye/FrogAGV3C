@@ -1,0 +1,23 @@
+.pagination-container {
+  background-color: #ffffff;
+  margin-top: 0px !important;
+}
+
+.el-table th > .cell {
+  font-size: 27px;
+  line-height: 27px;
+}
+
+.el-table .cell {
+  line-height: 22px;
+  font-size: 22px;
+}
+
+.el-pagination button,
+.el-pagination span:not([class*='suffix']) {
+  font-size: 18px;
+}
+
+.el-pagination__sizes .el-input .el-input__inner {
+  font-size: 18px;
+}

@@ -1,0 +1,263 @@
+.left-menu {
+  width: 200px;
+  color: #ffffff;
+  font-size: 25px;
+  text-align: center;
+  background-color: #f4e9e9;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  .menu-item {
+    height: 60px;
+    background-color: #e8d0d0;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 5px;
+  }
+  .current-menu {
+    background-color: #c0504d;
+  }
+  .pick {
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 25px;
+    height: 25px;
+    border-radius: 25px;
+    background-color: #ffffff;
+    color: red;
+    font-size: 14px;
+    line-height: 25px;
+    text-align: center;
+  }
+}
+
+.content-button {
+  color: #ffffff;
+  background-color: #f4e9e9;
+  height: 60px;
+  .btn {
+    width: 150px;
+    height: 40px;
+  }
+  .btn-default {
+    text-align: center;
+    font-size: 24px;
+    background-color: #558ed5;
+    margin-left: 50px;
+    border-radius: 10px;
+  }
+  .btn-click {
+    background-color: #17375e;
+  }
+  .btn-add {
+    background-color: #c00000;
+  }
+  .btn-update {
+    background-color: #00b050;
+  }
+}
+
+.setting-button-div {
+  .btn-default {
+    margin-left: 10px;
+  }
+  
+  .bom-sort {
+    width: 200px;
+    text-align: center;
+  }
+}
+.setting-table-div {
+  .bom-sort {
+    width: 180px;
+  }
+}
+.data-header-content {
+  background-color: #c0504d;
+  height: 60px;
+  font-size: 30px;
+  color: #ffffff;
+  .data-header-sort {
+    width: 200px;
+    text-align: center;
+  }
+  .data-header-name {
+    width: 400px;
+    text-align: center;
+  }
+  .data-header-num {
+    width: 120px;
+    text-align: center;
+  }
+  .data-header-done {
+    width: 120px;
+    text-align: center;
+  }
+  .data-header-operation {
+    text-align: center;
+  }
+}
+
+.data-content {
+  height: calc(100vh - 190px);
+  overflow-y: auto;
+  background-color: #f4e9e9;
+  .data-content-row,
+  .data-content-wave-row,
+  .data-content-produce-row {
+    height: auto;
+    min-height: 40px;
+    font-size: 15px;
+    // line-height: 40px;
+    
+    line-height: initial;
+  }
+
+  .data-content-produce-row {
+    background-color: #17375e;
+  }
+  .data-content-wave-row {
+    background-color: #8090a5;
+  }
+  .data-sort {
+    width: 250px;
+    text-align: center;
+  }
+  .data-name {
+    width: 400px;
+    text-align: center;
+    color: white;
+  }
+  .wave-name {
+    width: 400px;
+    text-align: center;
+  }
+  .bom-name {
+    width: 400px;
+    text-align: center;
+    padding-left: 40px;
+    font-size: 15px;
+    color: black;
+  }
+  .bom-sort {
+    width: 200px;
+    text-align: center;
+  }
+  .bom-num {
+    width: 120px;
+    text-align: center;
+    color: black;
+  }
+  .bom-done {
+    width: 120px;
+    text-align: center;
+  }
+  .bom-add-icon {
+    background-image: url('./add.png');
+    background-size: 40px 40px;
+    width: 40px;
+    height: 40px;
+    margin-left: 300px;
+    cursor: pointer;
+  }
+}
+
+.data-wave .data-content-row:nth-child(odd) {
+  background-color: #e8d0d0;
+}
+
+.data-content-operation {
+  .bom-delete,
+  .bom-update,
+  .bom-call,
+  .bom-back,
+  .bom-save {
+    width: 60px;
+    font-size: 20px;
+    background-color: #ffffff;
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  .bom-delete,
+  .bom-back {
+    color: #4a375e;
+    height: 30px;
+    line-height: 30px;
+  }
+
+  .bom-delete {
+    background-color: red;
+    color: white;
+  }
+
+  .bom-call {
+    height: 30px;
+    line-height: 30px;
+  }
+
+  .bom-cancel {
+    width: 60px;
+    font-size: 20px;
+    background-color: red;
+    margin-left: 30px;
+    height: 30px;
+    line-height: 30px;
+    cursor: pointer;
+    color: white;
+  }
+
+  .bom-update,
+  .bom-save {
+    color: #00b050;
+    height: 30px;
+    line-height: 30px;
+  }
+}
+
+.data-content-produce-operation {
+  .wave-delete,
+  .wave-add,
+  .wave-back,
+  .wave-save {
+    height: 30px;
+    line-height: 30px;
+    width: 60px;
+    font-size: 20px;
+    background-color: #ffffff;
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  .wave-delete,
+  .wave-back {
+    color: #4a375e;
+  }
+
+  .wave-delete {
+    color: white;
+    background-color: red;
+  }
+
+  .wave-add,
+  .wave-save {
+    color: #00b050;
+  }
+}
+
+.data-content-wave-operation {
+  .wave-delete {
+    width: 60px;
+    font-size: 20px;
+    background-color: red;
+    margin-left: 15px;
+    cursor: pointer;
+  }
+  .wave-delete {
+    height: 30px;
+    line-height: 30px;
+    color: white;
+  }
+}
+
+.disabledClick {
+  pointer-events: none;
+}
