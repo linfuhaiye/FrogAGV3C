@@ -20,6 +20,19 @@ import AgvHeader from './modules/AgvHeader';
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
+  state:{
+    msk:{}
+  },
+  mutations:{
+    riseValue:(state,fad) =>{
+      state.msk = fad
+    }
+  },
+  actions:{
+    riseValue({commit},fad) {
+      commit('riseValue',fad)
+    }
+  },
   modules: {
     app,
     errorLog,

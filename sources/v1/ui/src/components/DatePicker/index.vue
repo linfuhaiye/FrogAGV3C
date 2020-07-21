@@ -1,5 +1,5 @@
 <template>
-  <el-date-picker v-model="values" type="date" :picker-options="options" placeholder="选择日期" style="width: 100%;" value-format="yyyy-MM-dd">
+  <el-date-picker v-model="values" type="date" :picker-options="options" placeholder="选择日期" style="width: 100%;" :value-format="valueFormat">
   </el-date-picker>
 </template>
 

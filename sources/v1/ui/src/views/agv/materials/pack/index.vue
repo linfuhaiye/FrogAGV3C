@@ -26,6 +26,15 @@
         <!-- 配送任务 -->
         <div class="task-list-box flex-box flex-direction-column">
           <div class="task-list-title">配送任务</div>
+          <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
+            <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
+            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+          </div>
+          <div style="width: 71%;    margin-left: 182px">
+            <span  style="color:black;font-size: 16px;">日期：</span>
+          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 50%;" :value-format="'yyyy-MM-dd'">
+          </el-date-picker>
+          </div>
           <div style="overflow:auto; overflow-x:visible;">
             <div v-for="(item) in tasks" :key="item.id">
               <div class="task-list-name">{{item.productName}}</div>
@@ -69,18 +78,37 @@
   </div>
 </template>
 
+<style scoped>
+.flex-direction-row {
+    -webkit-box-orient: horizontal;
+    background: #f4e9e9;
+    height: 60px;
+}
+.el-select {
+    display: inline-block;
+    position: relative;
+    /* margin-top: 12px; */
+    margin-left: -10px;
+    width: 109px;
+}
+.el-input{
+    transition: all .3s;
+}
+</style>
+
 <script>
   import '../../product/home/home.scss';
   import './task.scss';
   import TaskOut from './taskOut';
   import request from '@/utils/request';
+  import SelectIndex from '@/components/Select/index'
   // import Constants from '@/utils/constants';
   // import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
   export default {
     name: 'home',
-    components: { TaskOut },
+    components: { TaskOut, SelectIndex },
     created() {
       this.loadingInfo();
     },
@@ -92,6 +120,7 @@
         },
         // 加载对象
         load: null,
+        params:{},
         sites: [],
         tasks: [],
         taskOutPositionName: '',
@@ -148,7 +177,8 @@
         request({
           // url: '/agv/callMaterials/distributionTasks',
           url: '/agv/callMaterials/selectWarehouseTask',
-          method: 'GET'
+          method: 'GET',
+          params: this.params
         })
           .then(response => {
             if (response.errno === 0) {

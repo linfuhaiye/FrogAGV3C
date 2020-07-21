@@ -35,6 +35,17 @@
             class="btn btn-default btn-click flex-box flex-justify-content-center flex-align-items-center"
             @click="showUnFinish()"
           >未完成</div>
+        <div class="flex-box flex-direction-row">
+            <div>
+            <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
+            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+            </div>
+            <div>
+            <p  style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;">生产日期：</p>
+            <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 100%;" :value-format="'yyyy-MM-dd'">
+            </el-date-picker>
+            </div>
+        </div>
           <!-- <div
             class="btn btn-default btn-add flex-box flex-justify-content-center flex-align-items-center"
             @click="addWave()"
@@ -128,6 +139,23 @@
   </div>
 </template>
 
+<style scoped>
+.flex-direction-row {
+    -webkit-box-orient: horizontal;
+    background: #f4e9e9;
+    height: 60px;
+}
+.el-select {
+    display: inline-block;
+    position: relative;
+    margin-top: 12px;
+}
+.el-input{
+    margin-top: 24px;
+    margin-left: 130px;
+}
+</style>
+
 <script>
   import './home.scss';
   import TaskOut from './changeLine';
@@ -135,6 +163,7 @@
   import AddBom from './addBom';
   import request from '@/utils/request';
   import Constants from '@/utils/constants';
+  import SelectIndex from '@/components/Select/index'
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
@@ -142,7 +171,7 @@
   // 配送管理
   export default {
     name: 'home',
-    components: { EditBom, AddBom, TaskOut },
+    components: { EditBom, AddBom, TaskOut ,SelectIndex },
     created() {
       this.loadingInfo();
     },
@@ -163,7 +192,8 @@
         areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
         auth: 'user',
         changeLineProduct: null,
-        changeLinePositionName: ''
+        changeLinePositionName: '',
+        params: {},
       };
     },
     methods: {
@@ -335,7 +365,8 @@
           params: {
             type: this.areaType,
             teamId: this.teamId,
-            state: this.waveState
+            state: this.waveState,
+            ...this.params
           }
         })
           .then(response => {

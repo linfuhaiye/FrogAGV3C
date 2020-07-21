@@ -35,6 +35,17 @@
             class="btn btn-default btn-click flex-box flex-justify-content-center flex-align-items-center"
             @click="showUnFinish()"
           >未完成</div>
+        <div class="flex-box flex-direction-row">
+          <div>
+          <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
+          <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+        </div>
+          <div>
+          <p  style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;">生产日期：</p>
+          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 100%;" :value-format="'yyyy-MM-dd'">
+          </el-date-picker>
+          </div>
+        </div>
         </div>
         <!-- 表头内容 -->
         <div class="flex-box data-header-content flex-align-items-center" style="width:100%;">
@@ -110,6 +121,27 @@
   </div>
 </template>
 
+<style scoped>
+.flex-direction-row {
+    -webkit-box-orient: horizontal;
+    background: #f4e9e9;
+    height: 60px;
+}
+.el-select {
+    display: inline-block;
+    position: relative;
+    margin-top: 12px;
+}
+.el-input{
+    transition: all .3s;
+    height: 10px;
+    width: 80%;
+    width: 100%;
+    margin-top: 24px;
+    margin-left: 130px;
+}
+</style>
+
 <script>
   import draggable from 'vuedraggable';
   import '../home/home.scss';
@@ -117,13 +149,14 @@
   import SaveBom from './saveBom';
   import request from '@/utils/request';
   import Constants from '@/utils/constants';
+  import SelectIndex from '@/components/Select/index'
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
   const areaTypeString = process.env.AREA_TYPE;
   export default {
     name: 'home',
-    components: { draggable, BackBom, SaveBom },
+    components: { draggable, BackBom, SaveBom ,SelectIndex },
     created() {
       this.loadingInfo();
     },
@@ -142,7 +175,8 @@
         datas: [],
         teamId: '',
         areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
-        auth: 'user'
+        auth: 'user',
+        params: {},
       };
     },
     methods: {
@@ -179,16 +213,19 @@
         this.getWaves();
       },
       getWaves() {
+       // console.log('params', this.params)
         request({
           url: '/agv/wavesPlan',
           method: 'GET',
           params: {
             type: this.areaType,
             teamId: this.teamId,
-            state: this.waveState
+            state: this.waveState,
+            ...this.params
           }
         })
           .then(response => {
+            // console.log(response)
             if (response.errno === 0) {
               if (!isEmpty(response.data)) {
                 this.waves = response.data;

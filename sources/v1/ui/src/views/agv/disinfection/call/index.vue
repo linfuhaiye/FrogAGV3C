@@ -23,6 +23,17 @@
         class="flex-box flex-direction-column"
         style="width:100%;margin-left:10px;margin-right:20px;"
       >
+        <div class="flex-box flex-direction-row">
+          <div>
+          <span style="color:black;width: 115px;margin-top: 16px;margin-left: 32px;font-size: 23px;">生产线：</span>
+          <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId= "''"></SelectIndex>
+          </div>
+          <div>
+          <p  style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;">生产日期：</p>
+          <el-date-picker class="el-input" v-model="params.executionTime" type="date"  placeholder="选择日期" style="width: 100%;" :value-format="'yyyy-MM-dd'">
+          </el-date-picker>
+          </div>
+        </div>
         <!-- 表头内容 -->
         <div class="flex-box data-header-content flex-align-items-center" style="width:100%;">
           <div class="data-header-name">名称</div>
@@ -31,9 +42,9 @@
           <div class="data-header-operation"></div>
         </div>
         <!-- 表格内容 -->
-        <div class="flex-box data-content flex-direction-column" style="width:100%;">
+        <div class="flex-box data-content flex-direction-column" style="width:100%; height:612px">
           <div v-for="(item) in callPlans" :key="item.id">
-            <div class="data-content-produce-row flex-box flex-align-items-center">
+             <div class="data-content-produce-row flex-box flex-align-items-center" :id="'a'+item.id">
               <div
                 class="data-name"
               >{{item.materialName+" （"+item.productLineCode+"）"+item.executionTime+" 【总共"+item.waveModels.length+"条】"}}</div>
@@ -41,7 +52,7 @@
               <div class="bom-done"></div>
               <div class="data-content-produce-operation flex-box flex-align-items-center"></div>
             </div>
-            <div class="data-wave" v-for="(wave,index) in item.waveModels" :key="wave.id">
+             <div :id="'waveModel'+item.id" class="data-wave" v-for="(wave,index) in item.waveModels" :key="wave.id">
               <div class="data-content-wave-row flex-box flex-align-items-center" v-if="index < 5">
                 <div class="wave-name">{{'波次' + (index + 1)}}</div>
                 <div class="bom-num"></div>
@@ -84,24 +95,50 @@
             </div>
           </div>
         </div>
+        <div id="poi">asdfawe</div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.flex-direction-row {
+    -webkit-box-orient: horizontal;
+    background: #f4e9e9;
+    height: 60px;
+}
+.el-select {
+    display: inline-block;
+    position: relative;
+    margin-top: 12px;
+}
+.el-input{
+    transition: all .3s;
+    height: 10px;
+    width: 80%;
+    width: 100%;
+    margin-top: 24px;
+    margin-left: 142px;
+}
+</style>
 
 <script>
   import '../../product/home/home.scss';
   import './call.scss';
   import request from '@/utils/request';
   // import Constants from '@/utils/constants';
+  import SelectIndex from '@/components/Select/index'
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
   export default {
     name: 'call',
-    components: {},
+    components: {SelectIndex},
     created() {
       this.loadingInfo();
+    },
+        mounted() {
+      console.log("*****",this.gas)
     },
     data() {
       return {
@@ -109,7 +146,12 @@
         state: {},
         // 加载对象
         load: null,
-        callPlans: []
+        callPlans: [],
+        params:{
+            waveType: 1,
+            callType: 3
+        },
+        gas:this.$store.state.msk
       };
     },
     methods: {
@@ -131,6 +173,9 @@
         }
         this.timer = setInterval(() => {
           this.getCallPlans();
+      var uio= document.getElementById("a1182");
+      console.log("444444", uio, document)
+uio.scrollTop = uio.scrollHeight;
         }, 5000);
       },
       // 叫波次
@@ -225,15 +270,14 @@
         request({
           url: '/agv/waves/callPlans',
           method: 'GET',
-          params: {
-            waveType: 1,
-            callType: 3
-          }
+          params: this.params
         })
           .then(response => {
+            console.log(response)
             if (response.errno === 0) {
               this.callPlans = response.data;
             }
+            
           })
           .catch(_ => {
             console.log(_);
