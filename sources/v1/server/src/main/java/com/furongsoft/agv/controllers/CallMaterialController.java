@@ -53,7 +53,7 @@ public class CallMaterialController {
      * @return 响应内容
      */
     @GetMapping("/callMaterials/distributionTasks")
-    public RestResponse selectDistributionTaskByConditions(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId) {
+    public RestResponse selectDistributionTaskByConditions(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId,@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
         return new RestResponse(HttpStatus.OK, null, callMaterialService.selectDistributionTaskByConditions(type, state, teamId, areaId, siteId));
     }
 
@@ -63,7 +63,7 @@ public class CallMaterialController {
      * @return 响应内容
      */
     @GetMapping("/callMaterials/selectWarehouseTask")
-    public RestResponse selectWarehouseTask() {
+    public RestResponse selectWarehouseTask(@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
         return new RestResponse(HttpStatus.OK, null, callMaterialService.selectWarehouseTask());
     }
 
