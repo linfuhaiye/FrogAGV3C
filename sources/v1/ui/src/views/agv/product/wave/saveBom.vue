@@ -33,35 +33,35 @@
 </template>
 
 <script>
-  export default {
-    name: 'saveBom',
-    data() {
-      return {
-        info: {
-          name: '原料A',
-          num: 50,
-          done: 45,
-          saveRemark: ''
-        }
+export default {
+  name: 'saveBom',
+  data() {
+    return {
+      info: {
+        name: '原料A',
+        num: 50,
+        done: 45,
+        saveRemark: ''
       }
+    };
   },
-    created() {
-      this.loadingInfo()
+  created() {
+    this.loadingInfo();
   },
-    props: {
-      id: [String, Number]
+  props: {
+    id: [String, Number]
+  },
+  methods: {
+    loadingInfo() {},
+    // 弹出框标志变化
+    toggleShow() {
+      this.$emit('toggleShow');
     },
-    methods: {
-      loadingInfo() {},
-      // 弹出框标志变化
-      toggleShow() {
-        this.$emit('toggleShow')
-      },
-      // 修改信息
-      updateData() {
-        console.log('updateData>>>>>>>>>>>', this.info)
-        this.$emit('toggleShow')
-      }
+    // 修改信息
+    updateData() {
+      console.log('updateData>>>>>>>>>>>', this.info);
+      this.$emit('toggleShow');
     }
   }
+};
 </script>

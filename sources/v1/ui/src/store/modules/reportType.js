@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 /**
  * 项目store
@@ -9,14 +9,14 @@ const type = {
   },
   mutations: {
     SET_TYPES: (state, types) => {
-      state.types = types
+      state.types = types;
     }
   },
   actions: {
     refreshType({ commit }, data) {
-      commit('SET_TYPES', data)
+      commit('SET_TYPES', data);
     }
   }
-}
+};
 
-export default type
+export default type;

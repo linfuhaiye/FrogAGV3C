@@ -122,7 +122,7 @@
         if (isEmpty(info.materialBoxId) || isEmpty(info.materialBoxModel)) {
           return;
         }
-        if (info.materialBoxModel.state != Constants.materialBoxState[1].value) {
+        if (info.materialBoxModel.state !== Constants.materialBoxState[1].value) {
           return;
         }
         const sendItem = {
@@ -164,7 +164,7 @@
           return true;
         }
         // 如果有料框，并且料框没货
-        if (info.materialBoxModel.state != Constants.materialBoxState[1].value) {
+        if (info.materialBoxModel.state !== Constants.materialBoxState[1].value) {
           return true;
         }
         // 如果当前有配送任务，则不能配送 TODO

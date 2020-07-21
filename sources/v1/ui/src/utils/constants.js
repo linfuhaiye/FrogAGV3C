@@ -75,4 +75,4 @@ export default {
     { value: 0, label: '空车' },
     { value: 1, label: '有货' }
   ]
-}
+};

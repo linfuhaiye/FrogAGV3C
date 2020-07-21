@@ -1,5 +1,5 @@
-'use strict'
-import request from '@/utils/request'
+'use strict';
+import request from '@/utils/request';
 
 /**
  * 部门store
@@ -10,7 +10,7 @@ const department = {
   },
   mutations: {
     SET_DEPARTMENT: (state, departments) => {
-      state.departments = departments
+      state.departments = departments;
     }
   },
   actions: {
@@ -21,15 +21,15 @@ const department = {
           method: 'GET'
         })
           .then(response => {
-            commit('SET_DEPARTMENT', response.data)
-            resolve()
+            commit('SET_DEPARTMENT', response.data);
+            resolve();
           })
           .catch(error => {
-            reject(error)
-          })
-      })
+            reject(error);
+          });
+      });
     }
   }
-}
+};
 
-export default department
+export default department;

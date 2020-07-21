@@ -69,106 +69,106 @@
 </template>
 
 <script>
-  import '../../product/home/home.scss';
-  // 包材商备货任务
-  export default {
-    name: 'home',
-    components: {},
-    created() {
-      this.$store.dispatch('updateTitle', '包材仓备货任务');
-      this.$store.dispatch('updateNeedLogin', false);
-    },
-    data() {
-      return {
-        state: {
-          editBomVisible: false,
-          addBomVisible: false
+import '../../product/home/home.scss';
+// 包材商备货任务
+export default {
+  name: 'home',
+  components: {},
+  created() {
+    this.$store.dispatch('updateTitle', '包材仓备货任务');
+    this.$store.dispatch('updateNeedLogin', false);
+  },
+  data() {
+    return {
+      state: {
+        editBomVisible: false,
+        addBomVisible: false
+      },
+      editBomId: null,
+      addBomWaveId: null,
+      cData: [
+        {
+          id: 1,
+          name: '产品A（L15）',
+          waves: [
+            {
+              id: 1,
+              boms: [
+                { id: 1, name: '原料A', num: 50, done: 1 },
+                { id: 2, name: '原料B', num: 50, done: 1 },
+                { id: 3, name: '原料C', num: 50, done: 1 }
+              ]
+            },
+            {
+              id: 2,
+              boms: [
+                { id: 1, name: '原料A', num: 50, done: 0 },
+                { id: 2, name: '原料B', num: 50, done: 0 }
+              ]
+            }
+          ]
         },
-        editBomId: null,
-        addBomWaveId: null,
-        cData: [
-          {
-            id: 1,
-            name: '产品A（L15）',
-            waves: [
-              {
-                id: 1,
-                boms: [
-                  { id: 1, name: '原料A', num: 50, done: 1 },
-                  { id: 2, name: '原料B', num: 50, done: 1 },
-                  { id: 3, name: '原料C', num: 50, done: 1 }
-                ]
-              },
-              {
-                id: 2,
-                boms: [
-                  { id: 1, name: '原料A', num: 50, done: 0 },
-                  { id: 2, name: '原料B', num: 50, done: 0 }
-                ]
-              }
-            ]
-          },
-          {
-            id: 2,
-            name: '产品B（L15）',
-            waves: [
-              {
-                id: 2,
-                boms: [
-                  { id: 1, name: '原料A', num: 50, done: 1 },
-                  { id: 2, name: '原料B', num: 50, done: 0 }
-                ]
-              }
-            ]
-          }
-        ]
-      };
-    },
-    methods: {
-      _getStatus(status) {
-        if (status == 1) {
-          return '已备货';
-        } else if (status == 0) {
-          return '未备货';
+        {
+          id: 2,
+          name: '产品B（L15）',
+          waves: [
+            {
+              id: 2,
+              boms: [
+                { id: 1, name: '原料A', num: 50, done: 1 },
+                { id: 2, name: '原料B', num: 50, done: 0 }
+              ]
+            }
+          ]
         }
-        return status;
-      },
-      // 跳转到波次管理页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      // 删除原料 -删除完后需要刷新cData
-      deleteBom(bomId) {
-        console.log('deleteBom>>>>>>' + bomId);
-      },
-      // 修改原料信息
-      updateBom(bomId) {
-        this.editBomId = bomId;
-        this.state.editBomVisible = true;
-      },
-      addBom(waveId) {
-        console.log('addBom----waveId', waveId);
-        this.addBomWaveId = waveId;
-        this.state.addBomVisible = true;
-      },
-      // 删除波次
-      deleteWave(waveId) {
-        console.log('deleteWave>>>>>>' + waveId);
-      },
-      // 删除产品
-      deleteProduce(produceId) {
-        console.log('deleteProduce>>>>>>' + produceId);
-      },
-      // 根据产品ID 增加一个波次
-      addWave(produceId) {
-        console.log('addWave>>>>>>' + produceId);
-      },
-      toggleShow() {
-        this.state.editBomVisible = false;
-        this.state.addBomVisible = false;
+      ]
+    };
+  },
+  methods: {
+    _getStatus(status) {
+      if (status === 1) {
+        return '已备货';
+      } else if (status === 0) {
+        return '未备货';
       }
+      return status;
+    },
+    // 跳转到波次管理页面
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    // 删除原料 -删除完后需要刷新cData
+    deleteBom(bomId) {
+      console.log('deleteBom>>>>>>' + bomId);
+    },
+    // 修改原料信息
+    updateBom(bomId) {
+      this.editBomId = bomId;
+      this.state.editBomVisible = true;
+    },
+    addBom(waveId) {
+      console.log('addBom----waveId', waveId);
+      this.addBomWaveId = waveId;
+      this.state.addBomVisible = true;
+    },
+    // 删除波次
+    deleteWave(waveId) {
+      console.log('deleteWave>>>>>>' + waveId);
+    },
+    // 删除产品
+    deleteProduce(produceId) {
+      console.log('deleteProduce>>>>>>' + produceId);
+    },
+    // 根据产品ID 增加一个波次
+    addWave(produceId) {
+      console.log('addWave>>>>>>' + produceId);
+    },
+    toggleShow() {
+      this.state.editBomVisible = false;
+      this.state.addBomVisible = false;
     }
-  };
+  }
+};
 </script>
 <style>
 .data-content {

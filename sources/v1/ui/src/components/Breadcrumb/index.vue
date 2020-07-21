@@ -1,8 +1,11 @@
 <template>
   <el-breadcrumb class="app-breadcrumb" separator="/">
     <transition-group name="breadcrumb">
-      <el-breadcrumb-item v-for="(item,index)  in levelList" :key="index" v-if='item.meta.title'>
-        <span v-if='item.redirect==="noredirect"||index==levelList.length-1' class="no-redirect">{{generateTitle(item.meta.title)}}</span>
+      <el-breadcrumb-item v-for="(item,index)  in levelList" :key="index" v-if="item.meta.title">
+        <span
+          v-if="item.redirect==='noredirect'||index==levelList.length-1"
+          class="no-redirect"
+        >{{generateTitle(item.meta.title)}}</span>
         <router-link v-else :to="item.redirect||item.path">{{generateTitle(item.meta.title)}}</router-link>
       </el-breadcrumb-item>
     </transition-group>
@@ -10,46 +13,48 @@
 </template>
 
 <script>
-import { generateTitle } from '@/utils/i18n'
+import { generateTitle } from '@/utils/i18n';
 
 export default {
   created() {
-    this.getBreadcrumb()
+    this.getBreadcrumb();
   },
   data() {
     return {
       levelList: null
-    }
+    };
   },
   watch: {
     $route() {
-      this.getBreadcrumb()
+      this.getBreadcrumb();
     }
   },
   methods: {
     generateTitle,
     getBreadcrumb() {
-      let matched = this.$route.matched.filter(item => item.name)
-      const first = matched[0]
+      let matched = this.$route.matched.filter(item => item.name);
+      const first = matched[0];
       if (first && first.name !== 'dashboard') {
         // matched = [{ path: '/dashboard', meta: { title: 'dashboard' }}].concat(matched)
-        matched = [{ path: '/pms/index', meta: { title: 'dashboard' }}].concat(matched)
+        matched = [{ path: '/pms/index', meta: { title: 'dashboard' }}].concat(
+          matched
+        );
       }
-      this.levelList = matched
+      this.levelList = matched;
     }
   }
-}
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-  .app-breadcrumb.el-breadcrumb {
-    display: inline-block;
-    font-size: 14px;
-    line-height: 50px;
-    margin-left: 10px;
-    .no-redirect {
-      color: #97a8be;
-      cursor: text;
-    }
+.app-breadcrumb.el-breadcrumb {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 50px;
+  margin-left: 10px;
+  .no-redirect {
+    color: #97a8be;
+    cursor: text;
   }
+}
 </style>

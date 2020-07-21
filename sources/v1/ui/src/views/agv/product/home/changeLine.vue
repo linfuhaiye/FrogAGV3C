@@ -38,7 +38,7 @@
 
     <div slot="footer" class="dialog-footer" align="center">
       <el-button @click="toggleShow" class="dialog-cancel-btn">{{$t('table.cancel')}}</el-button>
-      <el-button type="primary" @click="updateData" class="dialog-update-btn">{{$t('table.send')}}</el-button>
+      <el-button type="primary" @click="updateData" class="dialog-update-btn">{{$t('table.changeLine')}}</el-button>
     </div>
   </div>
 </template>

@@ -2,7 +2,8 @@ module.exports = {
   root: true,
   parser: 'babel-eslint',
   parserOptions: {
-    sourceType: 'module'
+    sourceType: 'module',
+    "allowImportExportEverywhere": true 
   },
   env: {
     browser: true,
@@ -12,7 +13,8 @@ module.exports = {
   extends: 'eslint:recommended',
   // required to lint *.vue files
   plugins: [
-    'html'
+    'html',
+    'vue'
   ],
   // check if imports actually resolve
   'settings': {
@@ -166,7 +168,7 @@ module.exports = {
       'avoidEscape': true,
       'allowTemplateLiterals': true
     }],
-    'semi': [2, 'never'],
+    'semi': [2, 'always'],
     'semi-spacing': [2, {
       'before': false,
       'after': true

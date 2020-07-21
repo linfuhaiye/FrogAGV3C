@@ -1,5 +1,5 @@
-'use strict'
-import request from '@/utils/request'
+'use strict';
+import request from '@/utils/request';
 
 /**
  * 岗位store
@@ -10,7 +10,7 @@ const position = {
   },
   mutations: {
     SET_POSITION: (state, positions) => {
-      state.positions = positions
+      state.positions = positions;
     }
   },
   actions: {
@@ -21,15 +21,15 @@ const position = {
           method: 'GET'
         })
           .then(response => {
-            commit('SET_POSITION', response.data)
-            resolve()
+            commit('SET_POSITION', response.data);
+            resolve();
           })
           .catch(error => {
-            reject(error)
-          })
-      })
+            reject(error);
+          });
+      });
     }
   }
-}
+};
 
-export default position
+export default position;

@@ -37,4 +37,4 @@ export default {
     other: '其他',
     all: '全部'
   }
-}
+};

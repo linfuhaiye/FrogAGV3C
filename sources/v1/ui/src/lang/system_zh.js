@@ -186,4 +186,4 @@ export default {
       otherReportType: '可不选项目、任务的特殊日报类型'
     }
   }
-}
+};

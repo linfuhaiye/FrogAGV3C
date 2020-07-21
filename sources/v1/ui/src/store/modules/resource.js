@@ -1,5 +1,5 @@
-'use strict'
-import request from '@/utils/request'
+'use strict';
+import request from '@/utils/request';
 
 /**
  * 树形菜单类型装完list
@@ -7,23 +7,23 @@ import request from '@/utils/request'
  * @returns resource级联数据
  */
 function renderResources(data) {
-  let tmp = [{ value: '0', label: '顶级菜单' }]
+  let tmp = [{ value: '0', label: '顶级菜单' }];
 
-  const render = (data) => {
-    Array.from(data).forEach((record) => {
+  const render = data => {
+    Array.from(data).forEach(record => {
       const obj = {
         value: record.id,
         label: record.name
-      }
-      tmp = tmp.concat(obj)
+      };
+      tmp = tmp.concat(obj);
       if (record.children && record.children.length > 0) {
-        render(record.children)
+        render(record.children);
       }
-    })
-  }
-  render(data)
+    });
+  };
+  render(data);
 
-  return tmp
+  return tmp;
 }
 
 /**
@@ -35,7 +35,7 @@ const area = {
   },
   mutations: {
     SET_RESOURCES: (state, resources) => {
-      state.resources = resources
+      state.resources = resources;
     }
   },
   actions: {
@@ -44,16 +44,18 @@ const area = {
         request({
           url: '/system/resources',
           method: 'GET'
-        }).then(response => {
-          const list = renderResources(JSON.parse(response.data))
-          commit('SET_RESOURCES', list)
-          resolve()
-        }).catch(error => {
-          reject(error)
         })
-      })
+          .then(response => {
+            const list = renderResources(JSON.parse(response.data));
+            commit('SET_RESOURCES', list);
+            resolve();
+          })
+          .catch(error => {
+            reject(error);
+          });
+      });
     }
   }
-}
+};
 
-export default area
+export default area;

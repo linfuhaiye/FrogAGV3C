@@ -1,5 +1,4 @@
-'use strict'
-import request from '@/utils/request'
+'use strict';
 
 /**
  * 项目store
@@ -10,14 +9,14 @@ const project = {
   },
   mutations: {
     SET_PROJECTS: (state, projects) => {
-      state.projects = projects
+      state.projects = projects;
     }
   },
   actions: {
     refreshProject({ commit }, data) {
-      commit('SET_PROJECTS', data)
+      commit('SET_PROJECTS', data);
     }
   }
-}
+};
 
-export default project
+export default project;

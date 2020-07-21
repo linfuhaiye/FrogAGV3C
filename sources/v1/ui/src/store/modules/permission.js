@@ -1,5 +1,5 @@
-import { asyncRouterMap } from '@/router'
-import request from '@/utils/request'
+import { asyncRouterMap } from '@/router';
+import request from '@/utils/request';
 
 /**
  * 通过meta.role判断是否与当前用户权限匹配
@@ -8,9 +8,9 @@ import request from '@/utils/request'
  */
 function hasPermission(roles, route) {
   if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.indexOf(role) >= 0)
+    return roles.some(role => route.meta.roles.indexOf(role) >= 0);
   } else {
-    return true
+    return true;
   }
 }
 
@@ -23,13 +23,13 @@ function filterAsyncRouter(asyncRouterMap, roles) {
   const accessedRouters = asyncRouterMap.filter(route => {
     if (hasPermission(roles, route)) {
       if (route.children && route.children.length) {
-        route.children = filterAsyncRouter(route.children, roles)
+        route.children = filterAsyncRouter(route.children, roles);
       }
-      return true
+      return true;
     }
-    return false
-  })
-  return accessedRouters
+    return false;
+  });
+  return accessedRouters;
 }
 
 const permission = {
@@ -39,23 +39,23 @@ const permission = {
   },
   mutations: {
     SET_ROUTERS: (state, routers) => {
-      state.addRouters = routers
-      state.routers = routers
+      state.addRouters = routers;
+      state.routers = routers;
     }
   },
   actions: {
     GenerateRoutes({ commit }, data) {
       return new Promise(resolve => {
-        const { roles } = data
-        let accessedRouters
+        const { roles } = data;
+        let accessedRouters;
         if (roles.indexOf('admin') >= 0) {
-          accessedRouters = asyncRouterMap
+          accessedRouters = asyncRouterMap;
         } else {
-          accessedRouters = filterAsyncRouter(asyncRouterMap, roles)
+          accessedRouters = filterAsyncRouter(asyncRouterMap, roles);
         }
-        commit('SET_ROUTERS', accessedRouters)
-        resolve()
-      })
+        commit('SET_ROUTERS', accessedRouters);
+        resolve();
+      });
     },
     loadMenus({ commit }, data) {
       return new Promise((resolve, reject) => {
@@ -63,12 +63,12 @@ const permission = {
           url: '/system/menus',
           method: 'GET'
         }).then(response => {
-          commit('SET_ROUTERS', JSON.parse(response.data))
-          resolve()
-        })
-      })
+          commit('SET_ROUTERS', JSON.parse(response.data));
+          resolve();
+        });
+      });
     }
   }
-}
+};
 
-export default permission
+export default permission;

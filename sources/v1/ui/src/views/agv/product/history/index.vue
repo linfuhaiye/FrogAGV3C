@@ -44,72 +44,68 @@
 </template>
 
 <script>
-  import ComplexTable from '@/components/ComplexTable';
-  import '../../product/home/home.scss';
-  import '../../table.scss';
+import ComplexTable from '@/components/ComplexTable';
+import '../../product/home/home.scss';
+import '../../table.scss';
 
-  export default {
-    name: 'call',
-    components: { ComplexTable },
-    created() {
-      this.$store.dispatch('updateTitle', '叫料历史');
-    },
-    data() {
-      return {
-        callState: 0,
-        fetchParams: {
-          type: 1,
-          teamId: 'uuidxxxxb03',
-          state: this.callState
+export default {
+  name: 'call',
+  components: { ComplexTable },
+  created() {
+    this.$store.dispatch('updateTitle', '叫料历史');
+  },
+  data() {
+    return {
+      callState: 0,
+      fetchParams: {
+        type: 1,
+        teamId: 'uuidxxxxb03',
+        state: this.callState
+      },
+      state: {},
+      columns: [
+        {
+          text: 'agv.bom.name',
+          value: 'name',
+          width: '50%',
+          sortable: 'false'
         },
-        state: {},
-        columns: [
-          {
-            text: 'agv.bom.name',
-            value: 'name',
-            width: '50%',
-            sortable: 'false'
-          },
-          {
-            text: 'agv.bom.code',
-            value: 'code',
-            width: '20%',
-            sortable: 'false'
-          },
-          {
-            text: 'agv.bom.num',
-            value: 'num',
-            width: '15%',
-            sortable: 'false'
-          },
-          // {
-          //   text: 'agv.bom.done',
-          //   value: 'done',
-          //   width: '20%',
-          //   sortable: 'false'
-          // },
-          {
-            text: 'agv.bom.status',
-            value: 'status',
-            width: '15%',
-            sortable: 'false'
-          }
-        ]
-      };
+        {
+          text: 'agv.bom.code',
+          value: 'code',
+          width: '20%',
+          sortable: 'false'
+        },
+        {
+          text: 'agv.bom.num',
+          value: 'num',
+          width: '15%',
+          sortable: 'false'
+        },
+        // {
+        //   text: 'agv.bom.done',
+        //   value: 'done',
+        //   width: '20%',
+        //   sortable: 'false'
+        // },
+        {
+          text: 'agv.bom.status',
+          value: 'status',
+          width: '15%',
+          sortable: 'false'
+        }
+      ]
+    };
+  },
+  methods: {
+    // 跳转到指定页面
+    turn(url) {
+      this.$router.push({ path: url });
     },
-    methods: {
-      // 跳转
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      // 跳转到指定页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {},
-      callBom(bomId) {
-        console.log('callBom>>>>>>>>>>>>', bomId);
-      }
+    toggleShow() {},
+    callBom(bomId) {
+      console.log('callBom>>>>>>>>>>>>', bomId);
     }
-  };
+  }
+};
 </script>

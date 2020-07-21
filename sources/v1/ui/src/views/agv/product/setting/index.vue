@@ -105,7 +105,7 @@
   import BackBom from './backBom';
   import SaveBom from './saveBom';
   import request from '@/utils/request';
-  import Constants from '@/utils/constants';
+  // import Constants from '@/utils/constants';
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 

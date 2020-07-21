@@ -1,11 +1,11 @@
-import system from './system_zh'
-import monitor from './monitor_zh'
-import pms from './pms_zh'
-import report from './report_zh'
-import mes from './mes_zh'
-import robot from './robot_zh'
-import frog from './frog_zh'
-import agv from './agv_zh'
+import system from './system_zh';
+import monitor from './monitor_zh';
+import pms from './pms_zh';
+import report from './report_zh';
+import mes from './mes_zh';
+import robot from './robot_zh';
+import frog from './frog_zh';
+import agv from './agv_zh';
 
 export default {
   system,
@@ -157,7 +157,8 @@ export default {
     switchRoles: '切换权限'
   },
   guide: {
-    description: '引导页对于一些第一次进入项目的人很有用，你可以简单介绍下项目的功能。本 Demo 是基于',
+    description:
+      '引导页对于一些第一次进入项目的人很有用，你可以简单介绍下项目的功能。本 Demo 是基于',
     button: '打开引导'
   },
   components: {
@@ -199,7 +200,7 @@ export default {
     cancel: '取 消',
     confirm: '确 定',
     send: '配 送',
-    send: '换 线',
+    changeLine: '换 线',
     turnBack: '退 回',
     roleTransfer: '分配角色',
     permissionTransfer: '分配权限',
@@ -229,7 +230,8 @@ export default {
   theme: {
     change: '换肤',
     documentation: '换肤文档',
-    tips: 'Tips: 它区别于 navbar 上的 theme-pick, 是两种不同的换肤方法，各自有不同的应用场景，具体请参考文档。'
+    tips:
+      'Tips: 它区别于 navbar 上的 theme-pick, 是两种不同的换肤方法，各自有不同的应用场景，具体请参考文档。'
   },
   tagsView: {
     refresh: '刷新',
@@ -247,4 +249,4 @@ export default {
     code: '用户编码',
     login: '前往登录'
   }
-}
+};

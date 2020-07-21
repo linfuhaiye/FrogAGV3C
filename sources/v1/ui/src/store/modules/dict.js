@@ -1,5 +1,5 @@
-'use strict'
-import request from '@/utils/request'
+'use strict';
+import request from '@/utils/request';
 
 /**
  * 字典store
@@ -10,7 +10,7 @@ const dict = {
   },
   mutations: {
     SET_DICTGROUP: (state, dictGroups) => {
-      state.dictGroups = dictGroups
+      state.dictGroups = dictGroups;
     }
   },
   actions: {
@@ -20,14 +20,14 @@ const dict = {
           url: '/system/dicts/0',
           method: 'GET'
         }).then(response => {
-          commit('SET_DICTGROUP', response.data)
-          resolve()
+          commit('SET_DICTGROUP', response.data);
+          resolve();
         }).catch(error => {
-          reject(error)
-        })
-      })
+          reject(error);
+        });
+      });
     }
   }
-}
+};
 
-export default dict
+export default dict;

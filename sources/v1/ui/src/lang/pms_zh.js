@@ -171,4 +171,4 @@ export default {
       update: '修改成员'
     }
   }
-}
+};

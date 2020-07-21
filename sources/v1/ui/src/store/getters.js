@@ -28,5 +28,5 @@ const getters = {
   userName: state => state.AgvHeader.userName,
   teamId: state => state.AgvHeader.teamId,
   auth: state => state.AgvHeader.auth
-}
-export default getters
+};
+export default getters;

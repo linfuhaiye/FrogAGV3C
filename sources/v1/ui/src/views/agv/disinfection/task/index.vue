@@ -64,108 +64,116 @@
 </template>
 
 <script>
-  import '../../product/home/home.scss';
-  import './task.scss';
-  import TaskOut from './taskOut';
-  import request from '@/utils/request';
-  import Constants from '@/utils/constants';
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import '../../product/home/home.scss';
+import './task.scss';
+import TaskOut from './taskOut';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+// import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'home',
-    components: { TaskOut },
-    created() {
-      this.loadingInfo();
-    },
-    data() {
-      return {
-        state: {
-          taskOutVisible: false
-        },
-        // 加载对象
-        load: null,
-        sites: [],
-        tasks: [],
-        taskOutPositionName: '',
-        taskOutBom: null
-      };
-    },
-    methods: {
-      loadingInfo() {
-        this.$store.dispatch('updateTitle', '消毒间配货任务');
-        this.$store.dispatch('updateNeedLogin', false);
-        this.timer();
+export default {
+  name: 'home',
+  components: { TaskOut },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      state: {
+        taskOutVisible: false
       },
-      // 跳转到配送管理页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {
-        this.state.taskOutVisible = false;
-      },
-      timer() {
-        this.getSites();
-        this.getDistributionTasks();
-        if (this.timer) {
-          clearInterval(this.timer);
-        }
-        this.timer = setInterval(() => {
-          this.getSites();
-          this.getDistributionTasks();
-        }, 5000);
-      },
-      taskOut(bom) {
-        this.taskOutBom = bom;
-        this.taskOutPositionName = bom.name;
-        this.state.taskOutVisible = true;
-      },
-      getSites() {
-        request({
-          url: '/agv/sites',
-          method: 'GET',
-          params: {
-            type: 4
-          }
-        })
-          .then(response => {
-            if (response.errno === 0) {
-              this.sites = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      getDistributionTasks() {
-        request({
-          url: '/agv/callMaterials/distributionTasks',
-          method: 'GET',
-          params: {
-            type: 1,
-            state: 1
-          }
-        })
-          .then(response => {
-            if (response.errno === 0) {
-              this.tasks = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
+      // 加载对象
+      load: null,
+      sites: [],
+      tasks: [],
+      taskOutPositionName: '',
+      taskOutBom: null
+    };
+  },
+  watch: {
+    tasks: {
+      deep: true,
+      handler(oldVal, newVal) {
+        console.log('tasks: ', oldVal, newVal);
       }
     }
-  };
+  },
+  methods: {
+    loadingInfo() {
+      this.$store.dispatch('updateTitle', '消毒间配货任务');
+      this.$store.dispatch('updateNeedLogin', false);
+      this.timer();
+    },
+    // 跳转到配送管理页面
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    toggleShow() {
+      this.state.taskOutVisible = false;
+    },
+    timer() {
+      this.getSites();
+      this.getDistributionTasks();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
+        this.getSites();
+        this.getDistributionTasks();
+      }, 5000);
+    },
+    taskOut(bom) {
+      this.taskOutBom = bom;
+      this.taskOutPositionName = bom.name;
+      this.state.taskOutVisible = true;
+    },
+    getSites() {
+      request({
+        url: '/agv/sites',
+        method: 'GET',
+        params: {
+          type: 4
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.sites = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    getDistributionTasks() {
+      request({
+        url: '/agv/callMaterials/distributionTasks',
+        method: 'GET',
+        params: {
+          type: 1,
+          state: 1
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.tasks = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
+    }
+  }
+};
 </script>

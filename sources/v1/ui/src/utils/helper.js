@@ -11,7 +11,7 @@ export function isEmpty(object) {
     object === '' ||
     object === 'undefined' ||
     object === 'null'
-  )
+  );
 }
 
 /**
@@ -22,26 +22,26 @@ export function isEmpty(object) {
  * @param {*} encode 是否进行URL编码,默认为true
  */
 export function urlEncode(param, key, encode) {
-  if (param == null) return ''
-  var paramStr = ''
-  var t = typeof param
+  if (param == null) return '';
+  var paramStr = '';
+  var t = typeof param;
   if (t === 'string' || t === 'number' || t === 'boolean') {
     paramStr +=
       '&' +
       key +
       '=' +
-      (encode == null || encode ? encodeURIComponent(param) : param)
+      (encode == null || encode ? encodeURIComponent(param) : param);
   } else {
     for (var i in param) {
       var k =
         key == null
           ? i
-          : key + (param instanceof Array ? '[' + i + ']' : '.' + i)
-      paramStr += urlEncode(param[i], k, encode)
+          : key + (param instanceof Array ? '[' + i + ']' : '.' + i);
+      paramStr += urlEncode(param[i], k, encode);
     }
   }
 
-  return paramStr
+  return paramStr;
 }
 
 /**
@@ -54,20 +54,20 @@ export function urlEncode(param, key, encode) {
 export function coppyArray(arr) {
   return arr.map(e => {
     if (typeof e === 'object') {
-      return Object.assign({}, e)
+      return Object.assign({}, e);
     } else {
-      return e
+      return e;
     }
-  })
+  });
 }
 
 export function exportFile(url) {
   if (navigator.userAgent.indexOf('Firefox') > 0) {
-    window.open(url)
+    window.open(url);
   } else {
-    var a = document.createElement('a')
-    a.href = url
-    a.click()
+    var a = document.createElement('a');
+    a.href = url;
+    a.click();
   }
 }
 
@@ -79,5 +79,5 @@ export function exportFile(url) {
  * @returns 日期
  */
 export function getTime(date) {
-  return isEmpty(date) ? null : new Date(date)
+  return isEmpty(date) ? null : new Date(date);
 }

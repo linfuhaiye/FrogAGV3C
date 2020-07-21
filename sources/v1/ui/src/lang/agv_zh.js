@@ -6,4 +6,4 @@ export default {
     done: '验收数量',
     status: '状态'
   }
-}
+};

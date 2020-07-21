@@ -75,175 +75,175 @@
 </template>
 
 <script>
-  import '../../product/home/home.scss';
-  import './task.scss';
-  import TaskOut from './taskOut';
-  import request from '@/utils/request';
-  import Constants from '@/utils/constants';
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import '../../product/home/home.scss';
+import './task.scss';
+import TaskOut from './taskOut';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'home',
-    components: { TaskOut },
-    created() {
-      this.loadingInfo();
+export default {
+  name: 'home',
+  components: { TaskOut },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      state: {
+        taskOutVisible: false
+      },
+      // 加载对象
+      load: null,
+      sites: [],
+      tasks: [],
+      taskOutPositionName: '',
+      taskOutBom: null
+    };
+  },
+  methods: {
+    loadingInfo() {
+      this.$store.dispatch('updateTitle', '拆包间配货任务');
+      this.$store.dispatch('updateNeedLogin', false);
+      this.timer();
     },
-    data() {
-      return {
-        state: {
-          taskOutVisible: false
-        },
-        // 加载对象
-        load: null,
-        sites: [],
-        tasks: [],
-        taskOutPositionName: '',
-        taskOutBom: null
-      };
+    // 跳转
+    turn(url) {
+      this.$router.push({ path: url });
     },
-    methods: {
-      loadingInfo() {
-        this.$store.dispatch('updateTitle', '拆包间配货任务');
-        this.$store.dispatch('updateNeedLogin', false);
-        this.timer();
-      },
-      // 跳转
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {
-        this.state.taskOutVisible = false;
-      },
-      timer() {
+    toggleShow() {
+      this.state.taskOutVisible = false;
+    },
+    timer() {
+      this.getSites();
+      this.getDistributionTasks();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
         this.getSites();
         this.getDistributionTasks();
-        if (this.timer) {
-          clearInterval(this.timer);
+      }, 5000);
+    },
+    taskOut(bom) {
+      this.taskOutBom = bom;
+      this.taskOutPositionName = bom.name;
+      this.state.taskOutVisible = true;
+    },
+    getSites() {
+      request({
+        url: '/agv/sites',
+        method: 'GET',
+        params: {
+          type: 5
         }
-        this.timer = setInterval(() => {
-          this.getSites();
-          this.getDistributionTasks();
-        }, 5000);
-      },
-      taskOut(bom) {
-        this.taskOutBom = bom;
-        this.taskOutPositionName = bom.name;
-        this.state.taskOutVisible = true;
-      },
-      getSites() {
-        request({
-          url: '/agv/sites',
-          method: 'GET',
-          params: {
-            type: 5
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.sites = response.data;
           }
         })
-          .then(response => {
-            if (response.errno === 0) {
-              this.sites = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      getDistributionTasks() {
-        request({
-          url: '/agv/callMaterials/distributionTasks',
-          method: 'GET',
-          params: {
-            type: 3,
-            state: 1
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    getDistributionTasks() {
+      request({
+        url: '/agv/callMaterials/distributionTasks',
+        method: 'GET',
+        params: {
+          type: 3,
+          state: 1
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.tasks = response.data;
           }
         })
-          .then(response => {
-            if (response.errno === 0) {
-              this.tasks = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      // 发货
-      deliverGoods(wave) {
-        const sendItem = {
-          waveCode: wave.waveCode,
-          type: 7
-        };
-        this.load = this.showErrorMessage('发货中，请稍后');
-        request({
-          url: '/agv/delivery/addDeliveryTask',
-          method: 'POST',
-          data: sendItem
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    // 发货
+    deliverGoods(wave) {
+      const sendItem = {
+        waveCode: wave.waveCode,
+        type: 7
+      };
+      this.load = this.showErrorMessage('发货中，请稍后');
+      request({
+        url: '/agv/delivery/addDeliveryTask',
+        method: 'POST',
+        data: sendItem
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getSites();
+            this.getDistributionTasks();
+          }
         })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+          console.log(_);
+        });
+    },
+    // 退回
+    turnBack(bom) {
+      const sendItem = {
+        startSiteId: bom.id,
+        materialBoxId: 0,
+        type: 4
+      };
+      this.load = this.showErrorMessage('正在退回,请等待...');
+      request({
+        url: '/agv/delivery/addDeliveryTask',
+        method: 'POST',
+        data: sendItem
+      })
+        .then(response => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getSites();
+            this.getDistributionTasks();
+            if (response.data === 'success') {
+              this.$message.success('退货成功');
+            } else {
+              this.$message.error('退货失败：' + response.data);
             }
-            if (response.errno === 0) {
-              this.getSites();
-              this.getDistributionTasks();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-            console.log(_);
-          });
-      },
-      // 退回
-      turnBack(bom) {
-        const sendItem = {
-          startSiteId: bom.id,
-          materialBoxId: 0,
-          type: 4
-        };
-        this.load = this.showErrorMessage('正在退回,请等待...');
-        request({
-          url: '/agv/delivery/addDeliveryTask',
-          method: 'POST',
-          data: sendItem
+          }
         })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getSites();
-              this.getDistributionTasks();
-              if (response.data === 'success') {
-                this.$message.success('退货成功');
-              } else {
-                this.$message.error('退货失败：' + response.data);
-              }
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败');
-          });
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
-      }
+        .catch(_ => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败');
+        });
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>

@@ -4,11 +4,11 @@
  * @returns 是否通用函数
  */
 export function validateFormatter(val) {
-  const func = ['sex', 'logType']
+  const func = ['sex', 'logType'];
   if (func.indexOf(val) === -1) {
-    return false
+    return false;
   }
-  return true
+  return true;
 }
 
 /**
@@ -19,12 +19,12 @@ export function validateFormatter(val) {
  */
 export function renderFormatter(val, formatter) {
   if (formatter === 'sex') {
-    return formatterSex(val)
+    return formatterSex(val);
   }
   if (formatter === 'logType') {
-    return formatterLogType(val)
+    return formatterLogType(val);
   }
-  return val
+  return val;
 }
 
 /**
@@ -34,11 +34,11 @@ export function renderFormatter(val, formatter) {
  */
 export function formatterSex(val) {
   if (val === 1) {
-    return 'sex.male'
+    return 'sex.male';
   } else if (val === 0) {
-    return 'sex.female'
+    return 'sex.female';
   }
-  return 'sex.unowk'
+  return 'sex.unowk';
 }
 
 /**
@@ -48,16 +48,16 @@ export function formatterSex(val) {
 export function formatterLogType(val) {
   switch (val) {
     case 'add':
-      return 'monitor.logType.add'
+      return 'monitor.logType.add';
     case 'edit':
-      return 'monitor.logType.edit'
+      return 'monitor.logType.edit';
     case 'del':
-      return 'monitor.logType.del'
+      return 'monitor.logType.del';
     case 'login':
-      return 'monitor.logType.login'
+      return 'monitor.logType.login';
     case 'logout':
-      return 'monitor.logType.logout'
+      return 'monitor.logType.logout';
     default:
-      return 'monitor.logType.other'
+      return 'monitor.logType.other';
   }
 }

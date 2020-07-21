@@ -67,7 +67,7 @@
 
 <script>
   import request from '@/utils/request';
-  import Constants from '@/utils/constants';
+  // import Constants from '@/utils/constants';
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
@@ -125,7 +125,7 @@
       },
       // 修改信息
       updateData() {
-        let sendItem = this.info;
+        const sendItem = this.info;
         sendItem.bomDetails = this.bomDetails;
         this.load = this.showErrorMessage('正在更新BOM,请稍后');
         request({

@@ -339,4 +339,4 @@ export default {
       pass: '审核通过'
     }
   }
-}
+};

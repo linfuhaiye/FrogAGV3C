@@ -1,47 +1,47 @@
-import Cookies from 'js-cookie'
-import { isEmpty } from './helper'
-import Constants from './constants'
+import Cookies from 'js-cookie';
+import { isEmpty } from './helper';
+import Constants from './constants';
 
-const TokenKey = 'Admin-Token'
+const TokenKey = 'Admin-Token';
 
 export function getToken() {
-  return Cookies.get(TokenKey)
+  return Cookies.get(TokenKey);
 }
 
 export function setToken(token) {
-  return Cookies.set(TokenKey, token)
+  return Cookies.set(TokenKey, token);
 }
 
 export function removeToken() {
-  return Cookies.remove(TokenKey)
+  return Cookies.remove(TokenKey);
 }
 
 export function setUserInfo() {
-  localStorage.clear()
+  localStorage.clear();
 }
 
 /**
  *  设置设备ID
  */
 export function setDeviceId(deviceId) {
-  localStorage.setItem('deviceId', deviceId)
+  localStorage.setItem('deviceId', deviceId);
 }
 
 export function getDeviceID() {
-  return localStorage.getItem('deviceId')
+  return localStorage.getItem('deviceId');
 }
 
 /**
  * 设置用户头像
  */
 export function setUserIcon(icon) {
-  localStorage.setItem('userIcon', icon)
+  localStorage.setItem('userIcon', icon);
 }
 
 export function getUserIcon() {
   return isEmpty(localStorage.getItem('userIcon'))
     ? process.env.SERVER_URL + Constants.userIcon
-    : localStorage.getItem('userIcon')
+    : localStorage.getItem('userIcon');
 }
 
 /**
@@ -50,15 +50,15 @@ export function getUserIcon() {
  */
 export function setUserAuth(auth) {
   if (isEmpty(auth)) {
-    return
+    return;
   }
-  var paths = []
+  var paths = [];
   Array.from(auth).forEach(item => {
     if (item.type === 1 && !isEmpty(item.path)) {
-      paths.push(item.path)
+      paths.push(item.path);
     }
-  })
-  localStorage.setItem('auth', JSON.stringify(paths))
+  });
+  localStorage.setItem('auth', JSON.stringify(paths));
 }
 
 /**
@@ -67,21 +67,21 @@ export function setUserAuth(auth) {
  * @returns true/false
  */
 export function hasAuth(auth) {
-  var allAuth = localStorage.getItem('auth')
+  var allAuth = localStorage.getItem('auth');
   if (isEmpty(allAuth) || isEmpty(auth)) {
-    return false
+    return false;
   } else {
-    allAuth = JSON.parse(allAuth)
-    auth = auth.split(',')
+    allAuth = JSON.parse(allAuth);
+    auth = auth.split(',');
     for (var i in auth) {
       for (var cAuth in allAuth) {
         if (allAuth[cAuth] === auth[i]) {
-          return true
+          return true;
         }
       }
     }
 
-    return false
+    return false;
   }
 }
 
@@ -90,15 +90,15 @@ export function hasAuth(auth) {
  */
 export function setUserConfigure(userConfigure) {
   if (isEmpty(userConfigure)) {
-    return
+    return;
   }
-  localStorage.setItem('userConfigure', JSON.stringify(userConfigure))
+  localStorage.setItem('userConfigure', JSON.stringify(userConfigure));
 }
 
 export function getUserConfigure() {
   return isEmpty(localStorage.getItem('userConfigure'))
     ? {}
-    : JSON.parse(localStorage.getItem('userConfigure'))
+    : JSON.parse(localStorage.getItem('userConfigure'));
 }
 
 /**
@@ -106,13 +106,13 @@ export function getUserConfigure() {
  */
 export function setUserName(userName) {
   if (isEmpty(userName)) {
-    return
+    return;
   }
-  localStorage.setItem('userName', userName)
+  localStorage.setItem('userName', userName);
 }
 
 export function getUserName() {
   return isEmpty(localStorage.getItem('userName'))
     ? ''
-    : localStorage.getItem('userName')
+    : localStorage.getItem('userName');
 }

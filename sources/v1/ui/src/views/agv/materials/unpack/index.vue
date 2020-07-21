@@ -70,109 +70,109 @@
 </template>
 
 <script>
-  import '../../product/home/home.scss';
-  import '../pack/task.scss';
-  import TaskOut from './taskOut';
-  import request from '@/utils/request';
-  import Constants from '@/utils/constants';
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import '../../product/home/home.scss';
+import '../pack/task.scss';
+import TaskOut from './taskOut';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+// import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'home',
-    components: { TaskOut },
-    created() {
-      this.loadingInfo();
+export default {
+  name: 'home',
+  components: { TaskOut },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      state: {
+        taskOutVisible: false
+      },
+      // 加载对象
+      load: null,
+      sites: [],
+      tasks: [],
+      taskOutPositionName: '',
+      taskOutBom: null
+    };
+  },
+  methods: {
+    loadingInfo() {
+      this.$store.dispatch('updateTitle', '包材仓-拆包间任务');
+      this.getSites();
+      this.getDistributionTasks();
     },
-    data() {
-      return {
-        state: {
-          taskOutVisible: false
-        },
-        // 加载对象
-        load: null,
-        sites: [],
-        tasks: [],
-        taskOutPositionName: '',
-        taskOutBom: null
+    // 跳转到配送管理页面
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    toggleShow() {
+      this.state.taskOutVisible = false;
+    },
+    taskOut(bom) {
+      this.taskOutBom = bom;
+      this.taskOutPositionName = bom.name;
+      this.state.taskOutVisible = true;
+    },
+    getSites() {
+      request({
+        url: '/agv/sites',
+        method: 'GET',
+        params: {
+          type: 6
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.sites = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    getDistributionTasks() {
+      request({
+        url: '/agv/callMaterials/distributionTasks',
+        method: 'GET',
+        params: {
+          type: 4,
+          state: 0
+        }
+      })
+        .then(response => {
+          if (response.errno === 0) {
+            this.tasks = response.data;
+          }
+        })
+        .catch(_ => {
+          console.log(_);
+        });
+    },
+    formatShowName(item) {
+      const showName = '';
+      // if (
+      //   !isEmpty(item.materialBoxMaterialModels) &&
+      //   item.materialBoxMaterialModels.length > 0
+      // ) {
+      //   item.materialBoxMaterialModels.forEach(obj => {
+      //     showName += obj.materialName + ' ' + obj.count + ' \n';
+      //   });
+      // }
+      return showName;
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
       };
-    },
-    methods: {
-      loadingInfo() {
-        this.$store.dispatch('updateTitle', '包材仓-拆包间任务');
-        this.getSites();
-        this.getDistributionTasks();
-      },
-      // 跳转到配送管理页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      toggleShow() {
-        this.state.taskOutVisible = false;
-      },
-      taskOut(bom) {
-        this.taskOutBom = bom;
-        this.taskOutPositionName = bom.name;
-        this.state.taskOutVisible = true;
-      },
-      getSites() {
-        request({
-          url: '/agv/sites',
-          method: 'GET',
-          params: {
-            type: 6
-          }
-        })
-          .then(response => {
-            if (response.errno === 0) {
-              this.sites = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      getDistributionTasks() {
-        request({
-          url: '/agv/callMaterials/distributionTasks',
-          method: 'GET',
-          params: {
-            type: 4,
-            state: 0
-          }
-        })
-          .then(response => {
-            if (response.errno === 0) {
-              this.tasks = response.data;
-            }
-          })
-          .catch(_ => {
-            console.log(_);
-          });
-      },
-      formatShowName(item) {
-        const showName = '';
-        // if (
-        //   !isEmpty(item.materialBoxMaterialModels) &&
-        //   item.materialBoxMaterialModels.length > 0
-        // ) {
-        //   item.materialBoxMaterialModels.forEach(obj => {
-        //     showName += obj.materialName + ' ' + obj.count + ' \n';
-        //   });
-        // }
-        return showName;
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
-      }
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>

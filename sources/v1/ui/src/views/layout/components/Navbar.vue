@@ -20,7 +20,7 @@
       <el-dropdown class="avatar-container right-menu-item" trigger="click">
         <div class="avatar-wrapper" style="display:flex">
           <span style="margin-right:5px;">{{this.getUserName()}}</span>
-          <img class="user-avatar" :src="userIcon">
+          <img class="user-avatar" :src="userIcon" />
           <i class="el-icon-caret-bottom"></i>
         </div>
         <el-dropdown-menu slot="dropdown">
@@ -49,75 +49,75 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
-import LangSelect from '@/components/LangSelect'
-import ThemePicker from '@/components/ThemePicker'
-import { getUserIcon, getUserConfigure, getUserName } from '@/utils/auth'
+import { mapGetters } from 'vuex';
+import Breadcrumb from '@/components/Breadcrumb';
+import Hamburger from '@/components/Hamburger';
+import ErrorLog from '@/components/ErrorLog';
+import Screenfull from '@/components/Screenfull';
+import LangSelect from '@/components/LangSelect';
+import ThemePicker from '@/components/ThemePicker';
+import { getUserIcon, getUserConfigure, getUserName } from '@/utils/auth';
 
 export default {
-    components: {
-      Breadcrumb,
-      Hamburger,
-      ErrorLog,
-      Screenfull,
-      LangSelect,
-      ThemePicker
-    },
-    computed: {
-      ...mapGetters(['sidebar', 'name', 'avatar'])
-    },
-    data() {
-      return {
-        userIcon: '',
-        state: {
-          editFormVisible: false,
-          configureVisible: false
-        },
-        // 修改密码数据
-        temp: {},
-        // 个人配置数据
-        configeData: {}
-      }
+  components: {
+    Breadcrumb,
+    Hamburger,
+    ErrorLog,
+    Screenfull,
+    LangSelect,
+    ThemePicker
   },
-    created() {
-      this.userIcon = this.getUserIcon()
-      this.configeData = this.getUserConfigure()
+  computed: {
+    ...mapGetters(['sidebar', 'name', 'avatar'])
   },
-    methods: {
-      // 用户头像
-      getUserIcon,
-      // 用户个人配置
-      getUserConfigure,
-      getUserName,
-      // 修改弹出框标志的值
-      togglePasswordShow() {
-        this.state.editFormVisible = false
+  data() {
+    return {
+      userIcon: '',
+      state: {
+        editFormVisible: false,
+        configureVisible: false
       },
-      toggleConfigureShow() {
-        this.state.configureVisible = false
-      },
-      toggleSideBar() {
-        this.$store.dispatch('toggleSideBar')
-      },
-      // 修改密码
-      changePassword() {
-        this.state.editFormVisible = true
-      },
-      // 个人配置
-      setUserConfigure() {
-        this.state.configureVisible = true
-      },
-      logout() {
-        this.$store.dispatch('LogOut').then(() => {
-          location.reload() // In order to re-instantiate the vue-router object to avoid bugs
-        })
-      }
+      // 修改密码数据
+      temp: {},
+      // 个人配置数据
+      configeData: {}
+    };
+  },
+  created() {
+    this.userIcon = this.getUserIcon();
+    this.configeData = this.getUserConfigure();
+  },
+  methods: {
+    // 用户头像
+    getUserIcon,
+    // 用户个人配置
+    getUserConfigure,
+    getUserName,
+    // 修改弹出框标志的值
+    togglePasswordShow() {
+      this.state.editFormVisible = false;
+    },
+    toggleConfigureShow() {
+      this.state.configureVisible = false;
+    },
+    toggleSideBar() {
+      this.$store.dispatch('toggleSideBar');
+    },
+    // 修改密码
+    changePassword() {
+      this.state.editFormVisible = true;
+    },
+    // 个人配置
+    setUserConfigure() {
+      this.state.configureVisible = true;
+    },
+    logout() {
+      this.$store.dispatch('LogOut').then(() => {
+        location.reload(); // In order to re-instantiate the vue-router object to avoid bugs
+      });
     }
   }
+};
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>

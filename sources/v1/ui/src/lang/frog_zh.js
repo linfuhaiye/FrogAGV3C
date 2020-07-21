@@ -120,4 +120,4 @@ export default {
       clear: '清空条件'
     }
   }
-}
+};
