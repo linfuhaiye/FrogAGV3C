@@ -38,7 +38,14 @@
           <div class="flex-box flex-direction-row">
             <div>
               <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
-              <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="searchParams.productLine" 
+              :url="'/agv/agvAreas/selectProductLines'" 
+              :isQueryCriteria="true" 
+              :defaultFirst="true" 
+              :valueIsCode="true" 
+              :valueIsNumber="false" 
+              :searchParams="{code: 'PRODUCT_FILLING'}">
+            </SelectIndex>
             </div>
             <div>
               <p
@@ -46,7 +53,7 @@
               >生产日期：</p>
               <el-date-picker
                 class="el-input"
-                v-model="params.executionTime"
+                v-model="searchParams.executionTime"
                 type="date"
                 placeholder="选择日期"
                 style="width: 100%;"
@@ -184,7 +191,7 @@ export default {
       teamId: '',
       areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
       auth: 'user',
-      params: {}
+      searchParams: {}
     };
   },
   methods: {
@@ -221,7 +228,6 @@ export default {
       this.getWaves();
     },
     getWaves() {
-      // console.log('params', this.params)
       request({
         url: '/agv/wavesPlan',
         method: 'GET',
@@ -229,7 +235,7 @@ export default {
           type: this.areaType,
           teamId: this.teamId,
           state: this.waveState,
-          ...this.params
+          ...this.searchParams
         }
       })
         .then(response => {
@@ -241,7 +247,6 @@ export default {
           }
         })
         .catch(_ => {
-          console.log(_);
         });
     },
     // 跳转到指定页面
@@ -278,7 +283,6 @@ export default {
           }
         })
         .catch(_ => {
-          console.log(_);
         });
     },
     toggleShow() {

@@ -135,4 +135,9 @@ public class CallMaterialModel implements Serializable {
      * 生产线编号
      */
     private String productLineCode;
+
+    /**
+     * 班组名称
+     */
+    private String teamName;
 }

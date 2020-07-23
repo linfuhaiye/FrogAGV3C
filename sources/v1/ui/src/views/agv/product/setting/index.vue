@@ -167,9 +167,6 @@
       addPlan() {
         console.log('**添加计划**');
       },
-      split() {
-        console.log('**拆分波次**');
-      },
       updatePlans() {
         this.load = this.showErrorMessage('计划更新中,请稍后...');
         request({
@@ -207,7 +204,6 @@
             }
           })
           .catch(_ => {
-            console.log(_);
           });
       },
       // 跳转到指定页面

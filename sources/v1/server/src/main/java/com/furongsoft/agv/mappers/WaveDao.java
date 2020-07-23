@@ -51,7 +51,7 @@ public interface WaveDao extends BaseMapper<Wave> {
      * @return 波次信息集合
      */
     @SelectProvider(type = DaoProvider.class, method = "selectWaveModels")
-    List<WaveModel> selectWaveModels(@Param("type") int type, @Param("teamId") String teamId, @Param("state") Integer state);
+    List<WaveModel> selectWaveModels(@Param("type") int type, @Param("teamId") String teamId, @Param("state") Integer state, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
 
     /**
      * 通过日期查询波次信息
@@ -198,6 +198,12 @@ public interface WaveDao extends BaseMapper<Wave> {
                         WHERE("t1.state <> 2");
                     } else if (null != param.get("state")) {
                         WHERE("t1.state = #{state}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(param.get("productLine"))) {
+                        WHERE("t3.code = #{productLine}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(param.get("executionTime"))) {
+                        WHERE("t1.execution_time LIKE CONCAT(#{executionTime},'%')");
                     }
                 }
             }.toString();

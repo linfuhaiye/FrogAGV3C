@@ -105,12 +105,12 @@
   .data-content-row,
   .data-content-wave-row,
   .data-content-produce-row {
-    height: auto;
-    min-height: 40px;
-    font-size: 15px;
+    // height: auto;
+    // min-height: 40px;
     // line-height: 40px;
-    
+    font-size: 15px;
     line-height: initial;
+    padding: 10px;
   }
 
   .data-content-produce-row {

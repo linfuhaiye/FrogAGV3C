@@ -50,7 +50,6 @@ export function registerUser(user) {
 
 // 修改用户密码
 export function updatePassword(passwordInfo) {
-  console.log(passwordInfo);
   const data = {
     oldPassword: md5(passwordInfo.oldPassword),
     newPassword: md5(passwordInfo.newPassword),

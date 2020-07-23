@@ -93,7 +93,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                 if (deliveryTaskModel.getEndSiteId() > 0) {
                     // 站点未配送的叫料集合
                     List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(1, 1,
-                            null, null, deliveryTaskModel.getEndSiteId());
+                            null, null, deliveryTaskModel.getEndSiteId(), null, null);
                     MaterialBoxModel materialBoxModel = siteService.selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
 //                    Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
 //                            deliveryTaskModel.getEndSiteId(), materialBoxModel.getId(), "消毒-灌装下发配送任务失败。", true, materialBoxMaterialModels);
@@ -147,7 +147,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                     for (SiteModel siteModel : siteModels) {
                         // 站点未配送的叫料集合
                         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(1, 1,
-                                null, null, siteModel.getId());
+                                null, null, siteModel.getId(), null, null);
                         if (CollectionUtils.isEmpty(callMaterialModels)) {
                             continue;
                         }
@@ -229,7 +229,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                 AgvArea agvArea = siteService.selectAgvAreaByCode("CB_LOCATION");
                 // 获取拆包间叫料信息
                 List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(4, 1, null,
-                        null, null);
+                        null, null, null, null);
                 if (CollectionUtils.isEmpty(callMaterialModels)) {
                     Tracker.error("包材-拆包配送失败。拆包间无叫料");
 //                    throw new BaseException("拆包间无未配送的叫料请求,无法发货");
@@ -300,7 +300,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                 if (deliveryTaskModel.getEndSiteId() > 0) {
                     // 站点未配送的叫料集合
                     List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(2, 1,
-                            null, null, deliveryTaskModel.getEndSiteId());
+                            null, null, deliveryTaskModel.getEndSiteId(), null, null);
                     MaterialBoxModel materialBoxModel = siteService
                             .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
 //                    Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
@@ -354,7 +354,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                     for (SiteModel siteModel : siteModels) {
                         // 站点未配送的叫料集合
                         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(2, 1,
-                                null, null, siteModel.getId());
+                                null, null, siteModel.getId(), null, null);
                         if (CollectionUtils.isEmpty(callMaterialModels)) {
                             continue;
                         }

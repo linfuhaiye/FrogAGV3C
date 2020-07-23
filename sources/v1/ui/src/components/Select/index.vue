@@ -64,6 +64,10 @@ export default {
       type: [Boolean],
       default: false
     },
+    valueIsNumber: {
+      type: Boolean,
+      default: true
+    },
     value: '',
     // 是否是查询条件
     isQueryCriteria: false,
@@ -77,7 +81,12 @@ export default {
     // 默认值
     defaultValue: '',
     disabled: false,
-    skey: 'default'
+    skey: 'default',
+    // 请求参数
+    searchParams: {
+      type: Object,
+      default: {}
+    }
   },
   created() {
     if (isEmpty(this.url)) {
@@ -137,16 +146,30 @@ export default {
       const render = data => {
         Array.from(data).forEach(record => {
           let obj = {};
-          if (this.valueIsCode) {
-            obj = {
-              value: Number(record.code),
-              label: record.name
-            };
+          if (this.valueIsNumber) {
+            if (this.valueIsCode) {
+              obj = {
+                value: Number(record.code),
+                label: record.name
+              };
+            } else {
+              obj = {
+                value: Number(record.id),
+                label: record.name
+              };
+            }
           } else {
-            obj = {
-              value: record.id,
-              label: record.name
-            };
+            if (this.valueIsCode) {
+              obj = {
+                value: record.code,
+                label: record.name
+              };
+            } else {
+              obj = {
+                value: record.id,
+                label: record.name
+              };
+            }
           }
           tmp = tmp.concat(obj);
           if (record.children && record.children.length > 0) {
@@ -171,7 +194,8 @@ export default {
       if (!isEmpty(this.url)) {
         request({
           url: this.url,
-          method: 'GET'
+          method: 'GET',
+          params: this.searchParams
         }).then(response => {
           if (response && response.data && response.data.length > 0) {
             this.options = this.renderSelected(response.data);

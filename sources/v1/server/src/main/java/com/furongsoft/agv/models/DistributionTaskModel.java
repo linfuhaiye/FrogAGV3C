@@ -52,6 +52,11 @@ public class DistributionTaskModel implements Serializable {
     private Date callTime;
 
     /**
+     * 班组名称
+     */
+    private String teamName;
+
+    /**
      * 叫料集合
      */
     private List<CallMaterialModel> callMaterialModels;

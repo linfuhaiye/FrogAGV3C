@@ -61,9 +61,9 @@ public class WaveService extends BaseService<WaveDao, Wave> {
      * @param state  状态[0：未配送；1：配送中；2：已完成]
      * @return 波次列表
      */
-    public List<WaveModel> selectWaveModels(int type, String teamId, Integer state) {
+    public List<WaveModel> selectWaveModels(int type, String teamId, Integer state, String productLine, String executionTime) {
         Map<String, WaveModel> waveModelMap = new HashMap<>();
-        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state);
+        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, productLine, executionTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         waveModels.forEach(waveModel -> {
             List<WaveDetailModel> waveDetailModels = waveDetailService.selectWaveDetails(waveModel.getCode());
@@ -103,8 +103,8 @@ public class WaveService extends BaseService<WaveDao, Wave> {
      * @param teamId 班组唯一标识
      * @return 波次计划集合
      */
-    public List<WaveModel> selectWaveModelsPlan(int type, String teamId, Integer state) {
-        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state);
+    public List<WaveModel> selectWaveModelsPlan(int type, String teamId, Integer state, String productLine, String executionTime) {
+        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, productLine, executionTime);
         waveModels.forEach(waveModel -> {
             List<WaveDetailModel> waveDetailModels = waveDetailService.selectWaveDetails(waveModel.getCode());
             waveModel.setWaveDetailModels(waveDetailModels);
@@ -119,10 +119,10 @@ public class WaveService extends BaseService<WaveDao, Wave> {
      * @param callType 叫料类型（3：消毒间；4：拆包间）
      * @return 叫料计划
      */
-    public List<WaveModel> selectCallPlan(int waveType, int callType) {
+    public List<WaveModel> selectCallPlan(int waveType, int callType, String productLine, String executionTime) {
         Map<String, WaveModel> waveModelMap = new HashMap<>();
         // 找出所有未完成配送的波次
-        List<WaveModel> waveModels = waveDao.selectWaveModels(waveType, null, 0);
+        List<WaveModel> waveModels = waveDao.selectWaveModels(waveType, null, 0, productLine, executionTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         waveModels.forEach(waveModel -> {
             // 所有波次详情

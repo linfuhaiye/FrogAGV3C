@@ -25,13 +25,22 @@
           <div class="task-list-title">配送任务</div>
           <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
             <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex
+              class="el-select"
+              v-model="searchParams.productLine"
+              :url="'/agv/agvAreas/selectProductLines'"
+              :isQueryCriteria="true"
+              :defaultFirst="true"
+              :valueIsCode="true"
+              :valueIsNumber="false"
+              :searchParams="{code: 'PRODUCT_FILLING'}"
+            ></SelectIndex>
           </div>
           <div style="width: 71%;    margin-left: 182px">
             <span style="color:black;font-size: 16px;">日期：</span>
             <el-date-picker
               class="el-input"
-              v-model="params.executionTime"
+              v-model="searchParams.executionTime"
               type="date"
               placeholder="选择日期"
               style="width: 50%;"
@@ -106,7 +115,6 @@ import './task.scss';
 import TaskOut from './taskOut';
 import request from '@/utils/request';
 import SelectIndex from '@/components/Select/index';
-// import Constants from '@/utils/constants';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
@@ -123,7 +131,7 @@ export default {
       },
       // 加载对象
       load: null,
-      params: {
+      searchParams: {
         type: 1,
         state: 1
       },
@@ -138,16 +146,18 @@ export default {
     tasks: {
       deep: true,
       handler(newVal, oldVal) {
-        if (!isEmpty(newVal) && !isEmpty(oldVal)) {
-          if (newVal.length > oldVal.length) {
+        if (!isEmpty(newVal)) {
+          if (isEmpty(oldVal)) {
             document.getElementById('playButton').click();
-          }
-        } else if (isEmpty(oldVal)) {
-          if (!isEmpty(newVal) && newVal.length > 0) {
-            document.getElementById('playButton').click();
+          } else {
+            for (const task of newVal) {
+              if (JSON.stringify(oldVal).indexOf(JSON.stringify(task)) === -1) {
+                document.getElementById('playButton').click();
+                return;
+              }
+            }
           }
         }
-        console.log('watch中的tasks: ', oldVal, newVal);
       }
     }
   },
@@ -197,24 +207,18 @@ export default {
             this.sites = response.data;
           }
         })
-        .catch(_ => {
-          console.log(_);
-        });
+        .catch(_ => {});
     },
     getDistributionTasks() {
       request({
         url: '/agv/callMaterials/distributionTasks',
         method: 'GET',
-        params: this.params
+        params: this.searchParams
       })
         .then(response => {
-          if (response.errno === 0) {
-            this.tasks = response.data;
-          }
+          this.tasks = response.data;
         })
-        .catch(_ => {
-          console.log(_);
-        });
+        .catch(_ => {});
     },
     // 用遮罩层显示错误信息
     showErrorMessage(message) {

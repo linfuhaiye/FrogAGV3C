@@ -134,16 +134,6 @@ export const constantRouterMap = [
     redirect: 'noredirect',
     children: [
       {
-        path: 'unpack',
-        component: () => import('@/views/agv/materials/unpack/index'),
-        name: 'materialsUnpack',
-        meta: {
-          title: 'materialsUnpack',
-          icon: 'materialsUnpack',
-          noCache: true
-        }
-      },
-      {
         path: 'pack',
         component: () => import('@/views/agv/materials/pack/index'),
         name: 'materialsPack',

@@ -3,10 +3,6 @@
     <div class="content flex-box fillParent">
       <!-- 左边菜单 -->
       <div class="left-menu">
-        <!-- <div
-          class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/materials/unpack')"
-        >拆包配货</div>-->
         <div
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
           @click="turn('/materials/pack')"

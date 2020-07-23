@@ -65,30 +65,34 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     /**
      * 根据条件获取叫料列表（默认获取未完成的）
      *
-     * @param type   叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
-     * @param state  状态[1：未配送；2：配送中；3：已完成；4：已取消]
-     * @param teamId 班组唯一标识
-     * @param areaId 区域ID（产线ID）
+     * @param type          叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
+     * @param state         状态[1：未配送；2：配送中；3：已完成；4：已取消]
+     * @param teamId        班组唯一标识
+     * @param areaId        区域ID（产线ID）
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 叫料列表
      */
     public List<CallMaterialModel> selectCallMaterialsByConditions(int type, Integer state, String teamId,
-                                                                   Long areaId, Long siteId) {
-        return callMaterialDao.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId);
+                                                                   Long areaId, Long siteId, String productLine, String executionTime) {
+        return callMaterialDao.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId, productLine, executionTime);
     }
 
     /**
      * 按条件查询配货任务
      *
-     * @param type   叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
-     * @param state  状态[1：未配送；2：配送中；3：已完成；4：已取消]
-     * @param teamId 班组唯一标识
-     * @param areaId 区域ID（产线ID）
+     * @param type          叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
+     * @param state         状态[1：未配送；2：配送中；3：已完成；4：已取消]
+     * @param teamId        班组唯一标识
+     * @param areaId        区域ID（产线ID）
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 配货任务列表
      */
     public List<DistributionTaskModel> selectDistributionTaskByConditions(int type, Integer state, String teamId,
-                                                                          Long areaId, Long siteId) {
+                                                                          Long areaId, Long siteId, String productLine, String executionTime) {
         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(type, state,
-                teamId, areaId, siteId);
+                teamId, areaId, siteId, productLine, executionTime);
         Map<String, DistributionTaskModel> distributionTaskModelMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(callMaterialModels)) {
             callMaterialModels.forEach(callMaterialModel -> {
@@ -96,9 +100,9 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
                         .get(callMaterialModel.getWaveCode());
                 if (ObjectUtils.isEmpty(distributionTaskModel)) {
                     DistributionTaskModel newDistributionTask = new DistributionTaskModel(
-                            callMaterialModel.getWaveCode(), callMaterialModel.getProductId(),
-                            callMaterialModel.getProductName(), callMaterialModel.getProductUuid(),
-                            callMaterialModel.getProductLineCode(), callMaterialModel.getCallTime(), new ArrayList<>());
+                            callMaterialModel.getWaveCode(), callMaterialModel.getProductId(), callMaterialModel.getProductName(),
+                            callMaterialModel.getProductUuid(), callMaterialModel.getProductLineCode(), callMaterialModel.getCallTime(),
+                            callMaterialModel.getTeamName(), new ArrayList<>());
                     newDistributionTask.getCallMaterialModels().add(callMaterialModel);
                     distributionTaskModelMap.put(callMaterialModel.getWaveCode(), newDistributionTask);
                 } else {
@@ -116,11 +120,13 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     /**
      * 查找仓库任务
      *
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 仓库未配送任务列表
      */
-    public List<DistributionTaskModel> selectWarehouseTask() {
-        List<DistributionTaskModel> packageTasks = selectDistributionTaskByConditions(2, 1, null, null, null);
-        List<DistributionTaskModel> unpack = selectDistributionTaskByConditions(4, 1, null, null, null);
+    public List<DistributionTaskModel> selectWarehouseTask(String productLine, String executionTime) {
+        List<DistributionTaskModel> packageTasks = selectDistributionTaskByConditions(2, 1, null, null, null, productLine, executionTime);
+        List<DistributionTaskModel> unpack = selectDistributionTaskByConditions(4, 1, null, null, null, productLine, executionTime);
         packageTasks.addAll(unpack);
         return packageTasks;
     }

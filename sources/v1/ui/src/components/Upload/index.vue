@@ -9,9 +9,9 @@
 </template>
 
 <script>
-import request from '@/utils/request'
-import { isEmpty } from '@/utils/helper'
-import { getToken } from '@/utils/auth'
+import request from '@/utils/request';
+import { isEmpty } from '@/utils/helper';
+import { getToken } from '@/utils/auth';
 
 /**
  * 上传图片组件
@@ -27,10 +27,10 @@ export default {
       // 服务器图片数据库ID
       uuid: '',
       headers: { 'Authorization': getToken() }
-    }
+    };
   },
   created() {
-    this.renderAvatar()
+    this.renderAvatar();
   },
   props: {
     // 文件ID
@@ -43,7 +43,7 @@ export default {
   watch: {
     value() {
       // 渲染头像
-      this.renderAvatar()
+      this.renderAvatar();
     }
   },
   methods: {
@@ -51,39 +51,38 @@ export default {
     handleAvatarSuccess(res, file) {
       if (res && res.code === 200 && res._embedded) {
         // this.imageUrl = process.env.SERVER_URL + '/attachments/' + res._embedded.name
-        this.uuid = res._embedded.id
-        this.$emit('input', this.uuid)
+        this.uuid = res._embedded.id;
+        this.$emit('input', this.uuid);
       } else {
-        this.imageUrl = ''
-        this.uuid = ''
-        this.$emit('input', this.uuid)
-        this.$message('上传失败')
+        this.imageUrl = '';
+        this.uuid = '';
+        this.$emit('input', this.uuid);
+        this.$message('上传失败');
       }
     },
     // 上传之前
     beforeAvatarUpload(file) {
-      return true
+      return true;
     },
     // 上传失败
     handleAvatarError(err) {
-      this.$message(err)
+      this.$message(err);
     },
     // 渲染头像
     renderAvatar() {
-      console.log('process.env.BASE_API: ', process.env.BASE_API, process.env.SERVER_URL)
       if (isEmpty(this.value)) {
-        this.imageUrl = ''
-        return
+        this.imageUrl = '';
+        return;
       }
       request({
         url: '/file/' + this.value,
         method: 'get'
       }).then(response => {
-        this.imageUrl = response.data
-      })
+        this.imageUrl = response.data;
+      });
     }
   }
-}
+};
 </script>
 
 <style>

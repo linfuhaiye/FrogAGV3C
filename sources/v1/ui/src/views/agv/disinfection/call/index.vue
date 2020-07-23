@@ -28,7 +28,14 @@
             <span
               style="color:black;width: 115px;margin-top: 16px;margin-left: 32px;font-size: 23px;"
             >生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="searchParams.productLine" 
+              :url="'/agv/agvAreas/selectProductLines'" 
+              :isQueryCriteria="true" 
+              :defaultFirst="true" 
+              :valueIsCode="true" 
+              :valueIsNumber="false" 
+              :searchParams="{code: 'PRODUCT_FILLING'}">
+            </SelectIndex>
           </div>
           <div>
             <p
@@ -36,7 +43,7 @@
             >生产日期：</p>
             <el-date-picker
               class="el-input"
-              v-model="params.executionTime"
+              v-model="searchParams.executionTime"
               type="date"
               placeholder="选择日期"
               style="width: 100%;"
@@ -165,7 +172,7 @@ export default {
       // 加载对象
       load: null,
       callPlans: [],
-      params: {
+      searchParams: {
         waveType: 1,
         callType: 3
       },
@@ -288,7 +295,7 @@ export default {
       request({
         url: '/agv/waves/callPlans',
         method: 'GET',
-        params: this.params
+        params: this.searchParams
       })
         .then(response => {
           console.log(response);
@@ -297,7 +304,6 @@ export default {
           }
         })
         .catch(_ => {
-          console.log(_);
         });
     },
     // 用遮罩层显示错误信息

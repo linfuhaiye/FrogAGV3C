@@ -40,8 +40,8 @@ public class WaveController {
      * @return 响应内容
      */
     @GetMapping("/waves")
-    public RestResponse getWaves(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state,@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModels(type, teamId, state));
+    public RestResponse getWaves(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModels(type, teamId, state, productLine, executionTime));
     }
 
     /**
@@ -52,8 +52,8 @@ public class WaveController {
      * @return 响应内容
      */
     @GetMapping("/waves/callPlans")
-    public RestResponse selectCallPlan(int waveType, int callType, @RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime ) {
-        return new RestResponse(HttpStatus.OK, null, waveService.selectCallPlan(waveType, callType));
+    public RestResponse selectCallPlan(int waveType, int callType, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectCallPlan(waveType, callType, productLine, executionTime));
     }
 
     /**
@@ -65,9 +65,8 @@ public class WaveController {
      * @return 响应内容
      */
     @GetMapping("/wavesPlan")
-    public RestResponse getWavesPlan(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state,@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
-
-        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModelsPlan(type, teamId, state));
+    public RestResponse getWavesPlan(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModelsPlan(type, teamId, state, productLine, executionTime));
     }
 
     /**

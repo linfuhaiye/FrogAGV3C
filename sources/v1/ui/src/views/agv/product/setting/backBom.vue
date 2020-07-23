@@ -102,7 +102,6 @@
           }
         })
           .then(response => {
-            console.log(response);
             // 如果遮罩层存在
             if (!isEmpty(this.load)) {
               this.load.close();
@@ -134,7 +133,6 @@
           data: sendItem
         })
           .then(response => {
-            console.log(response);
             // 如果遮罩层存在
             if (!isEmpty(this.load)) {
               this.load.close();
@@ -182,7 +180,7 @@
 }
 .bom-detail-title-name {
   font-size: 20px;
-  width: 55%;
+  width: 50%;
 }
 .bom-detail-title-num {
   font-size: 20px;
@@ -194,7 +192,7 @@
 }
 .bom-detail-data-name {
   font-size: 16px;
-  width: 60%;
+  width: 50%;
 }
 .bom-detail-data-num {
   font-size: 16px;

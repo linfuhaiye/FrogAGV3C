@@ -38,7 +38,14 @@
           <div class="flex-box flex-direction-row">
             <div>
               <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
-              <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="searchParams.productLine" 
+              :url="'/agv/agvAreas/selectProductLines'" 
+              :isQueryCriteria="true" 
+              :defaultFirst="true" 
+              :valueIsCode="true" 
+              :valueIsNumber="false" 
+              :searchParams="{code: 'PRODUCT_FILLING'}">
+            </SelectIndex>
             </div>
             <div>
               <p
@@ -46,7 +53,7 @@
               >生产日期：</p>
               <el-date-picker
                 class="el-input"
-                v-model="params.executionTime"
+                v-model="searchParams.executionTime"
                 type="date"
                 placeholder="选择日期"
                 style="width: 100%;"
@@ -201,7 +208,7 @@ export default {
       auth: 'user',
       changeLineProduct: null,
       changeLinePositionName: '',
-      params: {}
+      searchParams: {}
     };
   },
   methods: {
@@ -234,6 +241,7 @@ export default {
       this.getWaves();
     },
     showUnFinish() {
+      // TODO
       this.waveState = 0;
       this.getWaves();
     },
@@ -356,7 +364,6 @@ export default {
         });
     },
     changeLine(product) {
-      console.log(product);
       this.changeLineProduct = product;
       this.changeLinePositionName = product.materialName;
       this.state.changeLineVisible = true;
@@ -374,7 +381,7 @@ export default {
           type: this.areaType,
           teamId: this.teamId,
           state: this.waveState,
-          ...this.params
+          ...this.searchParams
         }
       })
         .then(response => {
@@ -383,7 +390,6 @@ export default {
           }
         })
         .catch(_ => {
-          console.log(_);
         });
     },
     // 格式化状态

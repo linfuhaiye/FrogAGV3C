@@ -49,7 +49,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
      * @return 叫料列表
      */
     @SelectProvider(type = DaoProvider.class, method = "selectCallMaterialsByConditions")
-    List<CallMaterialModel> selectCallMaterialsByConditions(@Param("type") int type, @Param("state") Integer state, @Param("teamId") String teamId, @Param("areaId") Long areaId, @Param("siteId") Long siteId);
+    List<CallMaterialModel> selectCallMaterialsByConditions(@Param("type") int type, @Param("state") Integer state, @Param("teamId") String teamId, @Param("areaId") Long areaId, @Param("siteId") Long siteId, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
 
     /**
      * 通过波次详情编码以及区域类型获取叫料信息
@@ -176,7 +176,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
                 {
                     SELECT("t1.id,t1.material_id,t1.count,t1.acceptance_count,t1.state,t1.type,t1.call_time,t1.wave_detail_code,t1.cancel_reason,t1.area_id,t1.team_id, t1.site_id, " +
                             "t2.name AS materialName, t2.code AS materialCode, t2.uuid AS materialUuid, t2.specs AS materialSpecs, t2.unit AS materialUnit, " +
-                            "t2.batch AS materialBatch, t4.code AS waveCode, t4.material_id AS productId, t5.name AS productName, t5.uuid AS productUuid, t6.code AS productLineCode");
+                            "t2.batch AS materialBatch, t4.code AS waveCode, t4.material_id AS productId, t4.team_name AS teamName, t5.name AS productName, t5.uuid AS productUuid, t6.code AS productLineCode");
                     FROM(CALL_MATERIAL_TABLE_NAME + " t1 ");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_id = t2.id ");
                     LEFT_OUTER_JOIN(WAVE_DETAIL_TABLE_NAME + " t3 ON t1.wave_detail_code = t3.code");
@@ -197,6 +197,12 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
                     }
                     if (null != param.get("siteId")) {
                         WHERE("t1.site_id=#{siteId}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(param.get("productLine"))) {
+                        WHERE("t6.code = #{productLine}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(param.get("executionTime"))) {
+                        WHERE("t4.execution_time LIKE CONCAT(#{executionTime},'%')");
                     }
                 }
             }.toString();

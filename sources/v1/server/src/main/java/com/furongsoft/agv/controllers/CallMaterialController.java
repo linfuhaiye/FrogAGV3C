@@ -36,35 +36,42 @@ public class CallMaterialController {
      * @param state  状态
      * @param teamId 班组唯一标识
      * @param areaId 区域ID
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 响应内容
      */
     @GetMapping("/callMaterials")
-    public RestResponse getCallMaterials(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId) {
-        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId));
+    public RestResponse getCallMaterials(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId, productLine, executionTime));
     }
 
     /**
      * 按条件查询配货任务
      *
-     * @param type   叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
-     * @param state  状态[1：未配送；2：配送中；3：已完成]
-     * @param teamId 班组唯一标识
-     * @param areaId 区域ID（产线ID）
+     * @param type          叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
+     * @param state         状态[1：未配送；2：配送中；3：已完成]
+     * @param teamId        班组唯一标识
+     * @param areaId        区域ID（产线ID）
+     * @param siteId        站点ID
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 响应内容
      */
     @GetMapping("/callMaterials/distributionTasks")
-    public RestResponse selectDistributionTaskByConditions(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId,@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectDistributionTaskByConditions(type, state, teamId, areaId, siteId));
+    public RestResponse selectDistributionTaskByConditions(int type, @RequestParam(required = false) Integer state, @RequestParam(required = false) String teamId, @RequestParam(required = false) Long areaId, @RequestParam(required = false) Long siteId, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectDistributionTaskByConditions(type, state, teamId, areaId, siteId, productLine, executionTime));
     }
 
     /**
      * 获取仓库任务
      *
+     * @param productLine   生产线（产线ID）
+     * @param executionTime 生产日期
      * @return 响应内容
      */
     @GetMapping("/callMaterials/selectWarehouseTask")
-    public RestResponse selectWarehouseTask(@RequestParam(required = false) String productLine,@RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectWarehouseTask());
+    public RestResponse selectWarehouseTask(@RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, callMaterialService.selectWarehouseTask(productLine, executionTime));
     }
 
     /**
@@ -158,9 +165,9 @@ public class CallMaterialController {
         String ip = getRequestIp(httpServletRequest);
         System.out.println(ip);
 //        httpServletResponse.getOutputStream().write("<meta http-equiv='content-type'  content='text/html;charset=GBK'/>".getBytes());
-        httpServletResponse.setCharacterEncoding("GBK");
+        httpServletResponse.setCharacterEncoding("UNICODE");
 //        httpServletResponse.setContentType("text/html;charset=GBK");
-        CallResponeModel callResponeModel = new CallResponeModel(0, "这都是些什么神仙操作。是GBK吗？");
+        CallResponeModel callResponeModel = new CallResponeModel(0, "这都是些什么神仙操作。是UNICODE吗？");
         return JSON.toJSONString(callResponeModel) + '\n';
     }
 

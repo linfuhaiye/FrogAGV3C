@@ -25,7 +25,16 @@
             <span
               style="color:black;width: 115px;margin-top: 16px;margin-left: 32px;font-size: 23px;"
             >生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex
+              class="el-select"
+              v-model="searchParams.productLine"
+              :url="'/agv/agvAreas/selectProductLines'"
+              :isQueryCriteria="true"
+              :defaultFirst="true"
+              :valueIsCode="true"
+              :valueIsNumber="false"
+              :searchParams="{code: 'PRODUCT_FILLING'}"
+            ></SelectIndex>
           </div>
           <div>
             <p
@@ -33,7 +42,7 @@
             >生产日期：</p>
             <el-date-picker
               class="el-input"
-              v-model="params.executionTime"
+              v-model="searchParams.executionTime"
               type="date"
               placeholder="选择日期"
               style="width: 100%;"
@@ -52,6 +61,7 @@
           <!-- 表格内容 -->
           <div class="flex-box data-content flex-direction-column" style="width:100%; height:612px">
             <div v-for="(item) in callPlans" :key="item.id">
+              <!-- 产品 -->
               <div class="data-content-produce-row flex-box flex-align-items-center">
                 <div
                   class="data-name"
@@ -60,6 +70,7 @@
                 <div class="bom-done"></div>
                 <div class="data-content-produce-operation flex-box flex-align-items-center"></div>
               </div>
+              <!-- 波次 -->
               <div class="data-wave" v-for="(wave,index) in item.waveModels" :key="wave.id">
                 <div
                   class="data-content-wave-row flex-box flex-align-items-center"
@@ -85,37 +96,31 @@
                     >取消</div>
                   </div>
                 </div>
-                <div
-                  v-if="index < 5"
-                  v-for="(bom) in wave.waveDetailModels"
-                  :key="bom.id"
-                  class="flex-box data-content-row"
-                >
-                  <div class="bom-name">{{bom.materialName}}</div>
+                <!-- 原料 -->
+                <div v-if="index < 5">
                   <div
-                    class="bom-num flex-box flex-align-items-center flex-justify-content-center"
-                  >{{bom.count}}</div>
-                  <div
-                    class="bom-done flex-box flex-align-items-center flex-justify-content-center"
+                    v-for="(bom) in wave.waveDetailModels"
+                    :key="bom.id"
+                    class="flex-box data-content-row"
                   >
-                    <span v-if="!isEmpty(bom.callId)">已叫料</span>
-                    <span v-else>未叫料</span>
-                  </div>
-                  <div
-                    class="data-content-operation flex-box flex-align-items-center"
-                    style="width:90px;"
-                  >
-                    <!-- <div class="bom-delete" @click="callBom(bom)" v-if="isEmpty(bom.callId)">叫料</div> -->
-                  </div>
-                  <div
-                    class="data-content-operation flex-box flex-align-items-center"
-                    style="width:90px;"
-                  >
-                    <!-- <div
-                    class="bom-cancel"
-                    @click="cancelCall(bom)"
-                    v-if="!isEmpty(bom.callId) && hasAuth(bom)"
-                    >取消</div>-->
+                    <div class="bom-name">{{bom.materialName}}</div>
+                    <div
+                      class="bom-num flex-box flex-align-items-center flex-justify-content-center"
+                    >{{bom.count}}</div>
+                    <div
+                      class="bom-done flex-box flex-align-items-center flex-justify-content-center"
+                    >
+                      <span v-if="!isEmpty(bom.callId)">已叫料</span>
+                      <span v-else>未叫料</span>
+                    </div>
+                    <div
+                      class="data-content-operation flex-box flex-align-items-center"
+                      style="width:90px;"
+                    ></div>
+                    <div
+                      class="data-content-operation flex-box flex-align-items-center"
+                      style="width:90px;"
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -152,7 +157,6 @@
 import '../../product/home/home.scss';
 import './call.scss';
 import request from '@/utils/request';
-import Constants from '@/utils/constants';
 import SelectIndex from '@/components/Select/index';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
@@ -170,7 +174,7 @@ export default {
       // 加载对象
       load: null,
       callPlans: [],
-      params: {
+      searchParams: {
         waveType: 1,
         callType: 4
       }
@@ -225,38 +229,6 @@ export default {
             this.load.close();
           }
           this.$message.error('服务器请求失败');
-          console.log(_);
-        });
-    },
-    // 叫详情
-    callBom(bom) {
-      const callBoms = [];
-      if (!isEmpty(bom)) {
-        bom.areaType = 4;
-        callBoms.push(bom);
-      }
-      this.load = this.showErrorMessage('叫料中，请稍后');
-      request({
-        url: '/agv/callMaterials/addWaveDetailCallMaterials',
-        method: 'POST',
-        data: callBoms
-      })
-        .then(response => {
-          // 如果遮罩层存在
-          if (!isEmpty(this.load)) {
-            this.load.close();
-          }
-          if (response.errno === 0) {
-            this.getCallPlans();
-          }
-        })
-        .catch(_ => {
-          // 如果遮罩层存在
-          if (!isEmpty(this.load)) {
-            this.load.close();
-          }
-          this.$message.error('服务器请求失败');
-          console.log(_);
         });
     },
     // 波次取消叫料
@@ -284,32 +256,6 @@ export default {
             this.load.close();
           }
           this.$message.error('服务器请求失败');
-          console.log(_);
-        });
-    },
-    // 取消叫料
-    cancelCall(row) {
-      this.load = this.showErrorMessage('正在取消，请稍后');
-      request({
-        url: '/agv/callMaterials/cancel/' + row.callId,
-        method: 'DELETE'
-      })
-        .then(response => {
-          // 如果遮罩层存在
-          if (!isEmpty(this.load)) {
-            this.load.close();
-          }
-          if (response.errno === 0) {
-            this.getCallPlans();
-          }
-        })
-        .catch(_ => {
-          // 如果遮罩层存在
-          if (!isEmpty(this.load)) {
-            this.load.close();
-          }
-          this.$message.error('服务器请求失败');
-          console.log(_);
         });
     },
     // 获取叫料计划
@@ -317,25 +263,14 @@ export default {
       request({
         url: '/agv/waves/callPlans',
         method: 'GET',
-        params: this.params
+        params: this.searchParams
       })
         .then(response => {
-          console.log('===*****', response);
           if (response.errno === 0) {
             this.callPlans = response.data;
           }
         })
-        .catch(_ => {
-          console.log(_);
-        });
-    },
-    // 是否可以点击
-    hasAuth(item) {
-      if (item.callState === Constants.deliveryState[0].value) {
-        return true;
-      } else {
-        return false;
-      }
+        .catch(_ => {});
     },
     // 用遮罩层显示错误信息
     showErrorMessage(message) {

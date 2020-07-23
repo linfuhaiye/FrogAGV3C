@@ -3,20 +3,9 @@
     <div class="content flex-box fillParent" style="height:100%">
       <!-- 左边菜单 -->
       <div class="left-menu">
-        <!-- <div
-          class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/materials/unpack')"
-        >拆包配货</div>-->
         <div
           class="menu-item current-menu flex-box flex-justify-content-center flex-align-items-center"
         >配货任务</div>
-        <!-- <div
-          class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/materials/stock')"
-        >
-          备货任务
-          <span class="pick">{{this.num}}</span>
-        </div>-->
       </div>
       <!-- 右边内容 -->
       <div
@@ -28,13 +17,20 @@
           <div class="task-list-title">配送任务</div>
           <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
             <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="params.productLine" :url="''" :parentId="''"></SelectIndex>
+            <SelectIndex class="el-select" v-model="searchParams.productLine" 
+              :url="'/agv/agvAreas/selectProductLines'" 
+              :isQueryCriteria="true" 
+              :defaultFirst="true" 
+              :valueIsCode="true" 
+              :valueIsNumber="false" 
+              :searchParams="{code: 'PRODUCT_FILLING'}">
+            </SelectIndex>
           </div>
           <div style="width: 71%;    margin-left: 182px">
             <span style="color:black;font-size: 16px;">日期：</span>
             <el-date-picker
               class="el-input"
-              v-model="params.executionTime"
+              v-model="searchParams.executionTime"
               type="date"
               placeholder="选择日期"
               style="width: 50%;"
@@ -43,7 +39,7 @@
           </div>
           <div style="overflow:auto; overflow-x:visible;">
             <div v-for="(item) in tasks" :key="item.id">
-              <div class="task-list-name">{{item.productName}}</div>
+              <div class="task-list-name">{{item.productName+'['+item.teamName+']'}}</div>
               <div v-for="(bom) in item.callMaterialModels" :key="bom.id" style="margin-top:5px;">
                 <div
                   class="task-list-bom-name"
@@ -126,7 +122,7 @@ export default {
       },
       // 加载对象
       load: null,
-      params: {},
+      searchParams: {},
       sites: [],
       tasks: [],
       taskOutPositionName: '',
@@ -175,24 +171,16 @@ export default {
             this.sites = response.data;
           }
         })
-        .catch(_ => {
-          console.log(_);
-        });
+        .catch(_ => {});
     },
     getDistributionTasks() {
       request({
-        // url: '/agv/callMaterials/distributionTasks',
         url: '/agv/callMaterials/selectWarehouseTask',
         method: 'GET',
-        params: this.params
+        params: this.searchParams
       })
         .then(response => {
-          if (response.errno === 0) {
-            this.tasks = response.data;
-          }
-        })
-        .catch(_ => {
-          console.log(_);
+          this.tasks = response.data;
         });
     },
     formatShowName(item) {

@@ -26,7 +26,9 @@
           <div class="data-content">
             <div v-for="(item) in tasks" :key="item.id">
               <div class="flex-box flex-direction-row data-content-produce-row">
-                <div class="task-list-name fillParent">{{item.productName}}</div>
+                <div
+                  class="task-list-name fillParent"
+                >{{item.productName + "[" + item.teamName + "]"}}</div>
                 <div
                   style="width:200px;"
                   class="data-content-operation flex-box flex-align-items-center"
@@ -65,56 +67,44 @@
     </div>
     <el-button id="playButton" hidden @click="playMusic"></el-button>
     <audio id="promptTone" src="../static/voices/newTask.mp3" preload="auto"></audio>
-    <el-dialog
-      v-if="state.taskOutVisible"
-      :visible.sync="state.taskOutVisible"
-      :title="taskOutPositionName"
-      class="dialog-transfer"
-    >
-      <TaskOut :bom="taskOutBom" @toggleShow="toggleShow" @reloadParent="loadingInfo"></TaskOut>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 import '../../product/home/home.scss';
 import './task.scss';
-import TaskOut from './taskOut';
 import request from '@/utils/request';
-// import Constants from '@/utils/constants';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
 export default {
   name: 'home',
-  components: { TaskOut },
+  components: {},
   created() {
     this.loadingInfo();
   },
   data() {
     return {
-      state: {
-        taskOutVisible: false
-      },
       // 加载对象
       load: null,
       sites: [],
-      tasks: [],
-      taskOutPositionName: '',
-      taskOutBom: null
+      tasks: []
     };
   },
   watch: {
     tasks: {
       deep: true,
       handler(newVal, oldVal) {
-        if (!isEmpty(newVal) && !isEmpty(oldVal)) {
-          if (newVal.length > oldVal.length) {
+        if (!isEmpty(newVal)) {
+          if (isEmpty(oldVal)) {
             document.getElementById('playButton').click();
-          }
-        } else if (isEmpty(oldVal)) {
-          if (!isEmpty(newVal) && newVal.length > 0) {
-            document.getElementById('playButton').click();
+          } else {
+            for (const task of newVal) {
+              if (JSON.stringify(oldVal).indexOf(JSON.stringify(task)) === -1) {
+                document.getElementById('playButton').click();
+                return;
+              }
+            }
           }
         }
       }
@@ -130,9 +120,6 @@ export default {
     turn(url) {
       this.$router.push({ path: url });
     },
-    toggleShow() {
-      this.state.taskOutVisible = false;
-    },
     timer() {
       this.getSites();
       this.getDistributionTasks();
@@ -143,11 +130,6 @@ export default {
         this.getSites();
         this.getDistributionTasks();
       }, 5000);
-    },
-    taskOut(bom) {
-      this.taskOutBom = bom;
-      this.taskOutPositionName = bom.name;
-      this.state.taskOutVisible = true;
     },
     getSites() {
       request({
@@ -162,9 +144,7 @@ export default {
             this.sites = response.data;
           }
         })
-        .catch(_ => {
-          console.log(_);
-        });
+        .catch(_ => {});
     },
     getDistributionTasks() {
       request({
@@ -176,13 +156,9 @@ export default {
         }
       })
         .then(response => {
-          if (response.errno === 0) {
-            this.tasks = response.data;
-          }
+          this.tasks = response.data;
         })
-        .catch(_ => {
-          console.log(_);
-        });
+        .catch(_ => {});
     },
     // 发货
     deliverGoods(wave) {
@@ -212,7 +188,6 @@ export default {
             this.load.close();
           }
           this.$message.error('服务器请求失败');
-          console.log(_);
         });
     },
     // 退回
