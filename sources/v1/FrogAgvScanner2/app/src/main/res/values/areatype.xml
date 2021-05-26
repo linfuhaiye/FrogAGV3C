@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="spinnerclass">
+        <item>3B消毒间</item>
+        <item>3B仓库</item>
+        <item>3C消毒间</item>
+        <item>3C仓库</item>
+    </string-array>
+</resources>
