@@ -9,6 +9,7 @@ import com.furongsoft.base.misc.HttpUtils;
 import com.furongsoft.base.misc.StringUtils;
 import com.furongsoft.base.misc.Tracker;
 import com.furongsoft.base.misc.UUIDUtils;
+import com.furongsoft.base.monitor.aop.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +23,8 @@ import java.util.List;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-//@Log
+@Log
 public class Scheduler extends BaseScheduler {
-    /**
-     * 容器索引
-     */
-    private final int containerIndex = 0;
     @Value("${geekplus.url}")
     private String url;
     @Value("${geekplus.clientCode}")
@@ -71,7 +68,8 @@ public class Scheduler extends BaseScheduler {
                         userKey, language, version),
                 new MovingCancelRequestMsg.Body("MovingCancelMsg", task.getWcsTaskId()));
         MovingCancelResponseMsg response = HttpUtils.postJson(url, null, request, MovingCancelResponseMsg.class);
-        if ((response == null) || (!response.getCode().equals("0"))) {
+        // TODO
+        if ((response == null) || (!response.getCode().equals("0") && response.getMsg().indexOf("任务不存在") < 0)) {
             return false;
         }
 
@@ -82,11 +80,6 @@ public class Scheduler extends BaseScheduler {
     public synchronized boolean onContainerArrived(String containerId, String destination) {
         // 自动生成容器索引
         if (StringUtils.isNullOrEmpty(containerId)) {
-//            if (++containerIndex < 0) {
-//                containerIndex = 0;
-//            }
-
-//            containerId = String.format("PA%06d", containerIndex);
             containerId = String.format("PA%s", UUIDUtils.getShortUuid());
         }
 

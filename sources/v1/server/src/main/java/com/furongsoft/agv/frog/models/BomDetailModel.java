@@ -49,4 +49,9 @@ public class BomDetailModel implements Serializable {
      * 物料ID
      */
     private Integer materialId;
+
+    /**
+     * 满料车数量
+     */
+    private Integer fullCount;
 }

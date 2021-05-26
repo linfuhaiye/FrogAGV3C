@@ -22,7 +22,6 @@ import java.util.List;
 public class SiteService extends BaseService<SiteDao, Site> {
 
     private final SiteDao siteDao;
-    private final StockUpRecordDao stockUpRecordDao;
     private final MaterialBoxDao materialBoxDao;
     private final MaterialBoxMaterialDao materialBoxMaterialDao;
     private final DeliveryTaskDao deliveryTaskDao;
@@ -30,12 +29,11 @@ public class SiteService extends BaseService<SiteDao, Site> {
     private final SiteDetailDao siteDetailDao;
 
     @Autowired
-    public SiteService(SiteDao siteDao, StockUpRecordDao stockUpRecordDao, MaterialBoxDao materialBoxDao,
+    public SiteService(SiteDao siteDao, MaterialBoxDao materialBoxDao,
                        MaterialBoxMaterialDao materialBoxMaterialDao, DeliveryTaskDao deliveryTaskDao, AgvAreaDao agvAreaDao,
                        SiteDetailDao siteDetailDao) {
         super(siteDao);
         this.siteDao = siteDao;
-        this.stockUpRecordDao = stockUpRecordDao;
         this.materialBoxDao = materialBoxDao;
         this.materialBoxMaterialDao = materialBoxMaterialDao;
         this.deliveryTaskDao = deliveryTaskDao;
@@ -69,11 +67,12 @@ public class SiteService extends BaseService<SiteDao, Site> {
     /**
      * 通过区域类型获取站点详细信息
      *
-     * @param type 区域类型[1：生产区；2：灌装区；3：包装区；4：消毒间；5：拆包间；6：包材仓；7：生产线；8：库位区]
+     * @param type       区域类型[1：生产区；2：灌装区；3：包装区；4：消毒间；5：拆包间；6：包材仓；7：生产线；8：库位区]
+     * @param areaCoding 区域编码
      * @return 站点详细信息
      */
-    public List<SiteModel> selectLocationByAreaType(int type) {
-        List<SiteModel> siteModels = siteDao.selectLocationByAreaType(type);
+    public List<SiteModel> selectLocationByAreaType(int type, String areaCoding) {
+        List<SiteModel> siteModels = siteDao.selectLocationByAreaType(type, areaCoding);
         if (!CollectionUtils.isEmpty(siteModels)) {
             siteModels.forEach(siteModel -> {
                 if (null != siteModel.getMaterialBoxId()) {
@@ -114,21 +113,21 @@ public class SiteService extends BaseService<SiteDao, Site> {
      *
      * @return 区域信息集合
      */
-    public List<AgvAreaModel> selectProductLinesByCode(String code) {
-        AgvAreaModel product = agvAreaDao.selectAgvAreaByCodeAndParent("PRODUCT", 0);
-        AgvAreaModel productArea = agvAreaDao.selectAgvAreaByCodeAndParent(code, product.getId());
+    public List<AgvAreaModel> selectProductLinesByCode(String code, String areaCoding) {
+        AgvArea product = agvAreaDao.selectAgvAreaByCode(areaCoding + "_PRODUCT");
+        AgvAreaModel productArea = agvAreaDao.selectAgvAreaByCodeAndParent(String.format("%s_%s", areaCoding, code), product.getId());
         return agvAreaDao.selectAreaByParentId(productArea.getId(), null);
     }
 
     /**
      * 通过区域编号以及产线编号查找生产区库位
      *
-     * @param areaCode 区域编号 "PRODUCT_FILLING"：灌装区；"PRODUCT_PACKAGING"：包装区
+     * @param areaCode 区域编号 "3B_PRODUCT_FILLING"、"3C_PRODUCT_FILLING"：灌装区；"3B_PRODUCT_PACKAGING"、"3C_PRODUCT_PACKAGING"：包装区
      * @param lineCode 产线编号
      * @return 指定的库位
      */
     public AgvAreaModel selectProductLocationByAreaCodeAndLineCode(String areaCode, String lineCode) {
-        AgvAreaModel product = agvAreaDao.selectAgvAreaByCodeAndParent("PRODUCT", 0);
+        AgvArea product = agvAreaDao.selectAgvAreaByCode(areaCode.substring(0, 2) + "_PRODUCT");
         AgvAreaModel productArea = agvAreaDao.selectAgvAreaByCodeAndParent(areaCode, product.getId());
         return agvAreaDao.selectAgvAreaByCodeAndParent(lineCode, productArea.getId());
     }
@@ -225,11 +224,12 @@ public class SiteService extends BaseService<SiteDao, Site> {
     /**
      * 通过类型查找区域
      *
-     * @param type 区域类型 8：库位区
+     * @param type       区域类型 8：库位区
+     * @param areaCoding 区域编码
      * @return 区域列表
      */
-    public List<AgvArea> selectAgvAreasByType(int type) {
-        return siteDao.selectAreaByType(type);
+    public List<AgvArea> selectAgvAreasByType(int type, String areaCoding) {
+        return siteDao.selectAreaByType(type, areaCoding);
     }
 
     /**

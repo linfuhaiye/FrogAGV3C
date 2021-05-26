@@ -35,6 +35,11 @@ public class CallButton extends BaseEntity {
     private String ipAddress;
 
     /**
+     * 设备唯一码
+     */
+    private String deviceKey;
+
+    /**
      * 端口号
      */
     private int port;

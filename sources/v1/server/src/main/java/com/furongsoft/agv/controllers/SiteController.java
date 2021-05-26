@@ -4,10 +4,7 @@ import com.furongsoft.agv.services.SiteService;
 import com.furongsoft.base.restful.entities.RestResponse;
 import lombok.NonNull;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 站点控制层
@@ -26,12 +23,13 @@ public class SiteController {
     /**
      * 根据区域类型获取站点列表
      *
-     * @param type 区域类型[1：生产区；2：灌装区；3：包装区；4：消毒间；5：拆包间；6：包材仓；7：生产线；8：库位区]
+     * @param type       区域类型[1：生产区；2：灌装区；3：包装区；4：消毒间；5：拆包间；6：包材仓；7：生产线；8：库位区]
+     * @param areaCoding 区域编码 3B、3C
      * @return 响应内容
      */
     @GetMapping("/sites")
-    public RestResponse getSites(int type) {
-        return new RestResponse(HttpStatus.OK, null, siteService.selectLocationByAreaType(type));
+    public RestResponse getSites(int type, @RequestParam(required = false) String areaCoding) {
+        return new RestResponse(HttpStatus.OK, null, siteService.selectLocationByAreaType(type, areaCoding));
     }
 
     /**

@@ -183,14 +183,11 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
         Tracker.agv(String.format("发货区域：%s", agvArea.toString()));
         // 如果区域类型是库位
         if (agvArea.getType() == 8) {
-            if (agvArea.getCode().indexOf("EMPTY") > -1 && StringUtils.isNullOrEmpty(materialCarCode)) {
-                deliveryTaskService.executeSchedulerRemoveContainer(siteModel.getId());
-                return "移除料车成功";
-            } else if (agvArea.getCode().indexOf("EMPTY") > -1) {
+            if (agvArea.getCode().indexOf("EMPTY") > -1) {
                 deliveryTaskService.executeSchedulerRemoveContainer(siteModel.getId());
                 return "不能在空车库位上发货";
             }
-            if (StringUtils.isNullOrEmpty(materialCarCode)) {
+            if (StringUtils.isNullOrEmpty(materialCode)) {
                 Tracker.agv("PDA发货失败：原料编号为空");
                 return "原料编号为空，请重新选择";
             }
@@ -201,7 +198,7 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
                 return "产品编号格式不正确，请重新选择";
             }
             // 目标点所属区域
-            AgvArea endSiteArea = siteService.selectAgvAreaBySiteId(Long.valueOf(items[3]));
+            AgvArea endSiteArea = siteService.selectAgvAreaBySiteId(Long.parseLong(items[3]));
             if (!ObjectUtils.isEmpty(endSiteArea)) {
                 // 目标区域的父级区域
                 AgvAreaModel endArea = siteService.selectParentAreaByAreaId(endSiteArea.getId());
@@ -210,8 +207,8 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
                     Tracker.agv("发到产线");
                     // 父级区域（灌装区、包装区）
                     AgvAreaModel endParentArea = siteService.selectParentAreaByAreaId(endArea.getId());
-                    // 需要在指定位置发货
-                    if (agvArea.getCode().indexOf("BC_SEND_LOCATION") < 0 && endParentArea.getCode().equalsIgnoreCase("PRODUCT_PACKAGING")) {
+                    // 需要在指定位置发货(包材仓-包装区需要指定位置上发货)
+                    if ((agvArea.getCode().contains("BC_SEND_LOCATION")) && (endParentArea.getCode().contains("PRODUCT_PACKAGING"))) {
                         return "需要在指定位置发货";
                     }
                 }
@@ -224,7 +221,7 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
             materialBoxMaterialDao.deleteMaterialBoxMaterialByMaterialId(materialBoxModel.getId()); // 将料框上的原料移除
             //
             AgvAreaModel parentArea = siteService.selectParentAreaByAreaId(agvArea.getId());
-            Tracker.agv("父级区域***");
+            Tracker.agv(String.format("发货区的父级区域：%s", parentArea.toString()));
             // 备货
             List<WaveDetailModel> waveDetailModels = waveDetailDao.selectWaveDetails(items[0]);
             if (!CollectionUtils.isEmpty(waveDetailModels)) {
@@ -238,19 +235,21 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
                 // 无原料列表
                 materialBoxDao.updateMaterialBoxState(materialBoxModel.getId(), 0); // 设成空车
             }
-            Tracker.agv("------======");
+
             siteDetailDao.addMaterialBoxBySiteId(siteModel.getId(), materialBoxModel.getId()); // 通过站点添加料框并设置站点为有货
             Tracker.agv(String.format("准备发货了： %s", siteModel.toString()));
             // 发货
             DeliveryTaskModel deliveryTaskModel = new DeliveryTaskModel();
             deliveryTaskModel.setStartSiteId(siteModel.getId());
-            deliveryTaskModel.setEndSiteId(Long.valueOf(items[3]));
+            deliveryTaskModel.setEndSiteId(Long.parseLong(items[3]));
             deliveryTaskModel.setMaterialBoxId(materialBoxModel.getId());
             deliveryTaskModel.setWaveCode(items[0]);
-            if (parentArea.getCode().equalsIgnoreCase("WAREHOUSE")) {
+            deliveryTaskModel.setAreaCoding(parentArea.getCode().substring(0, 2));
+            Tracker.agv(String.format("发货区域：%s", parentArea.getCode().substring(0, 2)));
+            if (parentArea.getCode().contains("WAREHOUSE")) {
                 // 包材仓（包材仓-包装区；包材仓-拆包间）
-                Long endSiteId = Long.valueOf(items[3]);
-                Long areaId = Long.valueOf(items[2]);
+                long endSiteId = Long.parseLong(items[3]);
+                long areaId = Long.parseLong(items[2]);
                 if (endSiteId > 0) {
                     AgvAreaModel agvAreaModel = siteService.selectAgvAreaById(areaId);
                     // 包材仓-包装区
@@ -260,14 +259,13 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
                     // 包材仓-拆包间
                     deliveryTaskModel.setType(3);
                 }
-            } else if (parentArea.getCode().equalsIgnoreCase("DISINFECTION")) {
-                Long areaId = Long.valueOf(items[2]);
+            } else if (parentArea.getCode().indexOf("DISINFECTION") > -1) {
+                long areaId = Long.parseLong(items[2]);
                 // 消毒间（消毒间-灌装区）
                 deliveryTaskModel.setType(1);
                 AgvAreaModel agvAreaModel = siteService.selectAgvAreaById(areaId);
                 deliveryTaskModel.setProductLine(agvAreaModel.getCode());
             }
-
             try {
                 return deliveryTaskService.addDeliveryTask(deliveryTaskModel);
             } catch (Exception e) {
@@ -277,5 +275,33 @@ public class StockUpRecordService extends BaseService<StockUpRecordDao, StockUpR
         }
 
         return "发货失败，请在库位上执行发货";
+    }
+
+    /**
+     * 清除料车
+     *
+     * @param landMaskCode 地标二维码
+     * @return 清除料车结果
+     */
+    public String cleanCar(String landMaskCode) {
+        // 站点
+        SiteModel siteModel = siteService.selectSiteModeByQrCode(landMaskCode);
+        if (null == siteModel) {
+            return "库位二维码有误，请确认";
+        }
+        // 发货区域
+        AgvArea agvArea = siteService.selectAgvAreaBySiteId(siteModel.getId());
+        Tracker.agv(String.format("移除料车区域：%s", agvArea.toString()));
+        // 如果区域类型是库位
+        if (agvArea.getType() == 8) {
+            if (agvArea.getCode().indexOf("EMPTY") > -1) {
+                deliveryTaskService.executeSchedulerRemoveContainer(siteModel.getId());
+                return "success";
+            } else {
+                return "非空库位，无法移除料车";
+            }
+        }
+
+        return "不是库位，无法移除料车";
     }
 }

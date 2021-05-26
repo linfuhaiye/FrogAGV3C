@@ -87,6 +87,20 @@ public class Task extends BaseEntity {
     private String failReason;
 
     /**
+     * 源站点名称
+     */
+    @Transient
+    @TableField(exist = false)
+    private String sourceName;
+
+    /**
+     * 目的站点名称
+     */
+    @Transient
+    @TableField(exist = false)
+    private String destinationName;
+
+    /**
      * 物料列表
      */
     @Transient

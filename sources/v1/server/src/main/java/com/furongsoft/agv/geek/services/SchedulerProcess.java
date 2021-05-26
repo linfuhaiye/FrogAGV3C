@@ -55,7 +55,6 @@ public class SchedulerProcess implements ISchedulerNotification {
             siteService.addMaterialBox(deliveryTaskModel.getEndSiteId(), deliveryTaskModel.getMaterialBoxId()); // 在目标点添加料框，并设为有货
             siteService.removeMaterialBox(deliveryTaskModel.getStartSiteId()); // 在起始点删除料框，并设为空闲
             Tracker.agv(String.format("执行任务更新: Task: %s", task.toString()));
-            //
             if (!StringUtils.isEmpty(deliveryTaskModel.getWaveCode())) {
                 List<CallMaterialModel> callMaterialModels = callMaterialService.selectUnFinishCallsByWaveCode(deliveryTaskModel.getWaveCode());
                 if (!CollectionUtils.isEmpty(callMaterialModels)) {
@@ -66,7 +65,8 @@ public class SchedulerProcess implements ISchedulerNotification {
                         }
                         // 拆包间的叫料配送时，通过目标站点找区域，判断区域是否是拆包，再将叫料改为已配送
                         AgvArea agvAreaModel = siteService.selectAgvAreaBySiteId(deliveryTaskModel.getEndSiteId());
-                        if (!ObjectUtils.isEmpty(agvAreaModel) && agvAreaModel.getCode().equalsIgnoreCase("CB_LOCATION")) {
+                        // TODO
+                        if (!ObjectUtils.isEmpty(agvAreaModel) && agvAreaModel.getCode().indexOf("CB_LOCATION") > -1) {
                             callMaterialService.updateCallMaterialStateByWaveCode(deliveryTaskModel.getWaveCode(), 4, 3);
                         }
                     });

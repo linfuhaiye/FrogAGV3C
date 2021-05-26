@@ -49,6 +49,7 @@ public class MobileController {
     /**
      * 获取产品列表
      *
+     * @param areaCode 区域编号  3B_WAREHOUSE、3C_DISINFECTION
      * @return 产品列表
      */
     @GetMapping("/products")
@@ -108,7 +109,7 @@ public class MobileController {
      */
     @GetMapping("/getInfo")
     public RestResponse getInfo(String qrCode) {
-        if (qrCode.indexOf(materialCarCode) > 0) {
+        if (qrCode.indexOf(materialCarCode) > -1) {
             return new RestResponse(HttpStatus.OK, null, stockUpRecordService.selectMaterialBoxModelByQrCode(qrCode));
         } else {
             return new RestResponse(HttpStatus.OK, null, stockUpRecordService.selectSiteDetailModelByQrCode(qrCode));
@@ -131,15 +132,15 @@ public class MobileController {
         }
     }
 
-//    /**
-//     * 执行发货操作 TODO 待修改
-//     *
-//     * @return
-//     */
-//    @PostMapping("/stockUp")
-//    public boolean stockUp(@RequestBody StockUpModel stockUpModel) {
-//        return stockUpRecordService.stockUp(stockUpModel.getMaterialCode(), stockUpModel.getMaterialCarCode(), stockUpModel.getLandMaskCode());
-//    }
+    /**
+     * 执行清除料车操作
+     *
+     * @return
+     */
+    @PostMapping("/cleanCar")
+    public String cleanCar(String landMaskName) {
+        return stockUpRecordService.cleanCar(landMaskName);
+    }
 
     /**
      * 原料信息

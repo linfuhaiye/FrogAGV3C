@@ -94,8 +94,8 @@ public class BomService extends BaseService<BomDao, Bom> {
      * @param bomId bom主键
      * @return bom详情列表
      */
-    public List<BomDetailModel> selectBomDetailsByBomId(long bomId) {
-        return bomDetailDao.selectBomDetailsByBomId(bomId);
+    public List<BomDetailModel> selectBomDetailModelsByBomId(long bomId) {
+        return bomDetailDao.selectBomDetailModelsByBomId(bomId);
     }
 
     /**
@@ -145,9 +145,17 @@ public class BomService extends BaseService<BomDao, Bom> {
         Bom bom = new Bom();
         BeanUtils.copyProperties(bomModel, bom);
         bomDao.updateById(bom);
-        bomModel.getBomDetails().forEach(bomDetail -> {
-            bomDetailDao.updateById(bomDetail);
-        });
+        bomModel.getBomDetails().forEach(bomDetailDao::updateById);
         return true;
+    }
+
+    /**
+     * 通过bomId查找子BOM列表
+     *
+     * @param bomId
+     * @return 子BOM列表
+     */
+    public List<BomDetail> selectBomDetailsByBomId(long bomId) {
+        return bomDetailDao.selectBomDetailsByBomId(bomId);
     }
 }

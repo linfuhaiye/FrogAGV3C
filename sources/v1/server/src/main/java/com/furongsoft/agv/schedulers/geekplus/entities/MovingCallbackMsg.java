@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 搬运回调
@@ -13,6 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@ToString
 public class MovingCallbackMsg {
     /**
      * 消息头参数列表

@@ -34,39 +34,48 @@ public class WaveController {
     /**
      * 根据条件获取波次列表
      *
-     * @param type   类型
-     * @param state  状态
-     * @param teamId 班组唯一标识
+     * @param type          类型
+     * @param teamId        班组唯一标识
+     * @param state         状态
+     * @param areaCoding    区域编码
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 响应内容
      */
     @GetMapping("/waves")
-    public RestResponse getWaves(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModels(type, teamId, state, productLine, executionTime));
+    public RestResponse getWaves(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, String areaCoding, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModels(type, teamId, state, areaCoding, productLine, executionTime));
     }
 
     /**
      * 获取叫料计划
      *
-     * @param waveType 波次计划类型（1：灌装区；2：包装区）
-     * @param callType 叫料类型（3：消毒间；4：拆包间）
+     * @param waveType      波次计划类型（1：灌装区；2：包装区）
+     * @param callType      叫料类型（3：消毒间；4：拆包间）
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 响应内容
      */
     @GetMapping("/waves/callPlans")
-    public RestResponse selectCallPlan(int waveType, int callType, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, waveService.selectCallPlan(waveType, callType, productLine, executionTime));
+    public RestResponse selectCallPlan(int waveType, int callType, String areaCoding, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime, @RequestParam(required = false) Integer maxBackNumber) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectCallPlan(waveType, callType, areaCoding, productLine, executionTime, maxBackNumber));
     }
 
     /**
      * 获取波次计划
      *
-     * @param type   类型
-     * @param state  状态
-     * @param teamId 班组唯一标识
+     * @param type          类型
+     * @param state         状态
+     * @param teamId        班组唯一标识
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 响应内容
      */
     @GetMapping("/wavesPlan")
-    public RestResponse getWavesPlan(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
-        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModelsPlan(type, teamId, state, productLine, executionTime));
+    public RestResponse getWavesPlan(int type, @RequestParam(required = false) String teamId, @RequestParam(required = false) Integer state, String areaCoding, @RequestParam(required = false) String productLine, @RequestParam(required = false) String executionTime) {
+        return new RestResponse(HttpStatus.OK, null, waveService.selectWaveModelsPlan(type, teamId, state, areaCoding, productLine, executionTime));
     }
 
     /**
@@ -177,10 +186,11 @@ public class WaveController {
      *
      * @param productOrderNo 生产单
      * @param lineCode       产线编号
+     * @param areaCoding     区域编码
      * @return 响应内容
      */
     @PutMapping("/waves/changeLine")
-    public RestResponse changeLine(@RequestParam String productOrderNo, @RequestParam String lineCode) {
-        return new RestResponse(HttpStatus.OK, null, waveService.waveChangeLine(productOrderNo, lineCode));
+    public RestResponse changeLine(@RequestParam String productOrderNo, @RequestParam String lineCode, @RequestParam(required = false) String areaCoding) {
+        return new RestResponse(HttpStatus.OK, null, waveService.waveChangeLine(productOrderNo, lineCode, areaCoding));
     }
 }

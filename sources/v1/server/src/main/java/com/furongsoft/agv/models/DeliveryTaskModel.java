@@ -2,6 +2,7 @@ package com.furongsoft.agv.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -12,6 +13,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@ToString
 public class DeliveryTaskModel implements Serializable {
     private long id;
 
@@ -69,4 +71,9 @@ public class DeliveryTaskModel implements Serializable {
      * 波次编号
      */
     private String waveCode;
+
+    /**
+     * 区域的编码 （3B、3C）
+     */
+    private String areaCoding;
 }

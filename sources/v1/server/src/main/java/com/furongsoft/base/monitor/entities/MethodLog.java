@@ -2,9 +2,13 @@ package com.furongsoft.base.monitor.entities;
 
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,8 +19,17 @@ import java.util.Date;
 @TableName("t_agv_method_log")
 @Getter
 @Setter
+@ToString
+@NoArgsConstructor
 public class MethodLog implements Serializable {
     private static final long serialVersionUID = -6173800286585256727L;
+
+    /**
+     * 索引
+     */
+    @Id
+    @GeneratedValue
+    private long id;
 
     /**
      * 包名称

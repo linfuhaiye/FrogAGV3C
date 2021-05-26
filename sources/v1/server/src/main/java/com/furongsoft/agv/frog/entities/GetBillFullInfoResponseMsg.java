@@ -2,10 +2,7 @@ package com.furongsoft.agv.frog.entities;
 
 import com.alibaba.druid.sql.visitor.functions.Char;
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -33,6 +30,7 @@ public class GetBillFullInfoResponseMsg extends BaseResponseMsg {
 
     @Getter
     @Setter
+    @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ResponseEntity {
@@ -45,6 +43,7 @@ public class GetBillFullInfoResponseMsg extends BaseResponseMsg {
 
     @Getter
     @Setter
+    @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DataEntity {
@@ -161,6 +160,7 @@ public class GetBillFullInfoResponseMsg extends BaseResponseMsg {
 
     @Getter
     @Setter
+    @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ItemEntity {
@@ -175,7 +175,7 @@ public class GetBillFullInfoResponseMsg extends BaseResponseMsg {
         private String cfirsttype;
 
         /**
-         * 源头单据号
+         * 源头单据号(MO号)
          */
         private String cfirstbillcode;
 

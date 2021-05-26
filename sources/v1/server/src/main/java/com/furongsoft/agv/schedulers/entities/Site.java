@@ -3,6 +3,7 @@ package com.furongsoft.agv.schedulers.entities;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * 站点
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 public class Site {
     /**

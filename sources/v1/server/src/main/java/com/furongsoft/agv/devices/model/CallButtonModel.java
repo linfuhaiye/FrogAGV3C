@@ -29,6 +29,11 @@ public class CallButtonModel implements Serializable {
     private String ipAddress;
 
     /**
+     * 设备唯一标识
+     */
+    private String deviceKey;
+
+    /**
      * 端口号
      */
     private int port;

@@ -1,9 +1,7 @@
 package com.furongsoft.agv.frog.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
 
 import java.util.Date;
 import java.util.List;
@@ -52,6 +50,7 @@ public class GetMoResponseMsg extends BaseResponseMsg {
 
     @Getter
     @Setter
+    @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     public static class DataEntity {
@@ -118,11 +117,13 @@ public class GetMoResponseMsg extends BaseResponseMsg {
         /**
          * 计划开工日期
          */
+        @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Shanghai")
         private Date jhkgrq;
 
         /**
          * 计划完工日期
          */
+        @JsonFormat(pattern = "yyyy-MM-dd", timezone = "Asia/Shanghai")
         private Date jhwgrq;
 
         /**

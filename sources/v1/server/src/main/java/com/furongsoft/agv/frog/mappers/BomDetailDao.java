@@ -55,7 +55,16 @@ public interface BomDetailDao extends BaseMapper<BomDetail> {
      * @return bom详情列表
      */
     @SelectProvider(type = DaoProvider.class, method = "selectBomDetailsByBomId")
-    List<BomDetailModel> selectBomDetailsByBomId(@Param("bomId") long bomId);
+    List<BomDetailModel> selectBomDetailModelsByBomId(@Param("bomId") long bomId);
+
+    /**
+     * 通过bom主键获取bom详情列表
+     *
+     * @param bomId bom主键selectBomDetailModelsByBomId
+     * @return bom详情列表
+     */
+    @SelectProvider(type = DaoProvider.class, method = "selectBomDetailsByBomId")
+    List<BomDetail> selectBomDetailsByBomId(@Param("bomId") long bomId);
 
     class DaoProvider {
         private static final String BOM_DETAIL_TABLE_NAME = BomDetail.class.getAnnotation(TableName.class).value();
@@ -69,7 +78,7 @@ public interface BomDetailDao extends BaseMapper<BomDetail> {
         public String selectBomDetailById() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type,t2.name AS materialName");
+                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type, t1.full_count,t2.name AS materialName");
                     FROM(BOM_DETAIL_TABLE_NAME + " t1");
                     WHERE("t1.id = #{id}");
                 }
@@ -84,7 +93,7 @@ public interface BomDetailDao extends BaseMapper<BomDetail> {
         public String selectBomDetailByBomId() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type,t2.name AS materialName,t2.id AS materialId");
+                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type, t1.full_count,t2.name AS materialName,t2.id AS materialId");
                     FROM(BOM_DETAIL_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_code = t2.uuid");
                     WHERE("t1.bom_id=#{bomId} AND t1.enabled=1");
@@ -100,7 +109,7 @@ public interface BomDetailDao extends BaseMapper<BomDetail> {
         public String selectBomDetailByBomIdAndType() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type,t2.name AS materialName,t2.id AS materialId");
+                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type, t1.full_count,t2.name AS materialName,t2.id AS materialId");
                     FROM(BOM_DETAIL_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_code = t2.uuid");
                     WHERE("t1.bom_id=#{bomId} AND t1.type=#{type} AND t1.enabled=1");
@@ -116,7 +125,7 @@ public interface BomDetailDao extends BaseMapper<BomDetail> {
         public String selectBomDetailsByBomId() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type,t2.name AS materialName,t2.id AS materialId");
+                    SELECT("t1.id,t1.bom_id,t1.material_code,t1.count,t1.type, t1.full_count, t2.name AS materialName,t2.id AS materialId");
                     FROM(BOM_DETAIL_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_code = t2.uuid");
                     WHERE("t1.bom_id=#{bomId} AND t1.enabled=1");

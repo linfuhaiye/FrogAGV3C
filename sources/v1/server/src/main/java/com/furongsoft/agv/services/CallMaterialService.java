@@ -2,6 +2,7 @@ package com.furongsoft.agv.services;
 
 import com.furongsoft.agv.devices.mappers.CallButtonDao;
 import com.furongsoft.agv.devices.model.CallButtonModel;
+import com.furongsoft.agv.entities.AgvArea;
 import com.furongsoft.agv.entities.CallMaterial;
 import com.furongsoft.agv.frog.services.BomService;
 import com.furongsoft.agv.mappers.AgvAreaDao;
@@ -38,10 +39,11 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     private final WaveDetailDao waveDetailDao;
     private final DeliveryTaskService deliveryTaskService;
     private final BomService bomService;
+    private final SiteService siteService;
 
     @Autowired
     public CallMaterialService(CallMaterialDao callMaterialDao, CallButtonDao callButtonDao, AgvAreaDao agvAreaDao,
-                               WaveDao waveDao, WaveDetailDao waveDetailDao, DeliveryTaskService deliveryTaskService, BomService bomService) {
+                               WaveDao waveDao, WaveDetailDao waveDetailDao, DeliveryTaskService deliveryTaskService, BomService bomService, SiteService siteService) {
         super(callMaterialDao);
         this.callMaterialDao = callMaterialDao;
         this.callButtonDao = callButtonDao;
@@ -50,6 +52,7 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
         this.waveDetailDao = waveDetailDao;
         this.deliveryTaskService = deliveryTaskService;
         this.bomService = bomService;
+        this.siteService = siteService;
     }
 
     /**
@@ -69,13 +72,15 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
      * @param state         状态[1：未配送；2：配送中；3：已完成；4：已取消]
      * @param teamId        班组唯一标识
      * @param areaId        区域ID（产线ID）
-     * @param productLine   生产线（产线ID）
-     * @param executionTime 生产日期
+     * @param siteId        站点ID
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 叫料列表
      */
     public List<CallMaterialModel> selectCallMaterialsByConditions(int type, Integer state, String teamId,
-                                                                   Long areaId, Long siteId, String productLine, String executionTime) {
-        return callMaterialDao.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId, productLine, executionTime);
+                                                                   Long areaId, Long siteId, String areaCoding, String productLine, String executionTime) {
+        return callMaterialDao.selectCallMaterialsByConditions(type, state, teamId, areaId, siteId, areaCoding, productLine, executionTime);
     }
 
     /**
@@ -85,14 +90,16 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
      * @param state         状态[1：未配送；2：配送中；3：已完成；4：已取消]
      * @param teamId        班组唯一标识
      * @param areaId        区域ID（产线ID）
-     * @param productLine   生产线（产线ID）
-     * @param executionTime 生产日期
+     * @param siteId        站点ID
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 配货任务列表
      */
     public List<DistributionTaskModel> selectDistributionTaskByConditions(int type, Integer state, String teamId,
-                                                                          Long areaId, Long siteId, String productLine, String executionTime) {
+                                                                          Long areaId, Long siteId, String areaCoding, String productLine, String executionTime) {
         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(type, state,
-                teamId, areaId, siteId, productLine, executionTime);
+                teamId, areaId, siteId, areaCoding, productLine, executionTime);
         Map<String, DistributionTaskModel> distributionTaskModelMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(callMaterialModels)) {
             callMaterialModels.forEach(callMaterialModel -> {
@@ -120,13 +127,14 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     /**
      * 查找仓库任务
      *
+     * @param areaCoding    区域编码（3B、3C）
      * @param productLine   生产线（产线ID）
      * @param executionTime 生产日期
      * @return 仓库未配送任务列表
      */
-    public List<DistributionTaskModel> selectWarehouseTask(String productLine, String executionTime) {
-        List<DistributionTaskModel> packageTasks = selectDistributionTaskByConditions(2, 1, null, null, null, productLine, executionTime);
-        List<DistributionTaskModel> unpack = selectDistributionTaskByConditions(4, 1, null, null, null, productLine, executionTime);
+    public List<DistributionTaskModel> selectWarehouseTask(String areaCoding, String productLine, String executionTime) {
+        List<DistributionTaskModel> packageTasks = selectDistributionTaskByConditions(2, 1, null, null, null, areaCoding, productLine, executionTime);
+        List<DistributionTaskModel> unpack = selectDistributionTaskByConditions(4, 1, null, null, null, areaCoding, productLine, executionTime);
         packageTasks.addAll(unpack);
         return packageTasks;
     }
@@ -164,14 +172,18 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
      * 新增波次叫料
      *
      * @param waveDetailModels 波次详情
+     * @param areaCoding       区域编号（3B、3C）
+     * @param areaType         "DISINFECTION"：消毒间、"UNPACKING"：拆包间
      */
-    public void addWaveDetailCallMaterials(List<WaveDetailModel> waveDetailModels) {
+    public void addWaveDetailCallMaterials(List<WaveDetailModel> waveDetailModels, String areaCoding, String areaType) {
         if (!CollectionUtils.isEmpty(waveDetailModels)) {
+            AgvArea agvArea = siteService.selectAgvAreaByCode(String.format("%s_%s", areaCoding, areaType));
             List<CallMaterial> insertCalls = new ArrayList<>();
             waveDetailModels.forEach(waveDetailModel -> {
                 CallMaterial callMaterial = new CallMaterial(waveDetailModel);
                 Date newDate = new Date();
                 callMaterial.setCallTime(newDate);
+                callMaterial.setAreaId(agvArea.getId());
                 CallMaterialModel callMaterialModel = callMaterialDao.selectCallMaterialByWaveDetailCodeAndAreaType(
                         waveDetailModel.getCode(), waveDetailModel.getAreaType());
                 if (ObjectUtils.isEmpty(callMaterialModel)) {
@@ -226,32 +238,17 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     }
 
     /**
-     * 按钮叫料 TODO 项目启动时，把按钮信息加载到内存中
-     *
-     * @param ipAddress
-     * @throws Exception
-     */
-    public void buttonCallMaterial(String ipAddress, String buttonCode) throws Exception {
-        CallButtonModel callButtonModel = callButtonDao.selectCallButtonAreaByIpAddress(ipAddress, buttonCode);
-        if (callButtonModel.getCode().indexOf("CALL") > 0) {
-            callMaterial(callButtonModel);
-        }
-        if (callButtonModel.getCode().indexOf("BACK") > 0) {
-            backMaterialBox(callButtonModel);
-        }
-    }
-
-    /**
      * 按钮叫料
      *
      * @param callButtonModel 按钮对象
      */
-    public boolean callMaterial(CallButtonModel callButtonModel) {
+    public String callMaterial(CallButtonModel callButtonModel) {
+        // 找出对应站点未配送的叫料列表
         List<CallMaterialModel> called = callMaterialDao.selectCallMaterialBySiteAndState(callButtonModel.getSiteId(), 1);
         if (!CollectionUtils.isEmpty(called)) {
             Tracker.agv(String.format("存在未配送的叫料，叫料失败。站点：%s", callButtonModel.getSiteId()));
             Tracker.agv(String.format("未配送的叫料列表： called: %s", called.toString()));
-            return true;
+            return "叫料失败:存在未配送的叫料";
         }
         // 获取叫料产线
         AgvAreaModel callLine = agvAreaDao.selectParentAreaById(callButtonModel.getAreaId());
@@ -280,10 +277,10 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
                         WaveDetailModel calledModel = waveDetailModelMap.get(waveDetailModel.getCode());
                         // 如果还未叫料，则加入未叫料波次详情列表中
                         if (ObjectUtils.isEmpty(calledModel)) {
-                            if (callArea.getCode().equals("PRODUCT_FILLING")) {
+                            if (callArea.getCode().indexOf("PRODUCT_FILLING") > -1) {
                                 // 灌装区
                                 waveDetailModel.setAreaType(1);
-                            } else if (callArea.getCode().equals("PRODUCT_PACKAGING")) {
+                            } else if (callArea.getCode().indexOf("PRODUCT_PACKAGING") > -1) {
                                 // 包装区
                                 waveDetailModel.setAreaType(2);
                             }
@@ -298,10 +295,10 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
                 } else {
                     // 如果没有已叫料的。
                     waveDetailModels.forEach(waveDetailModel -> {
-                        if (callArea.getCode().equals("PRODUCT_FILLING")) {
+                        if (callArea.getCode().indexOf("PRODUCT_FILLING") > -1) {
                             // 灌装区
                             waveDetailModel.setAreaType(1);
-                        } else if (callArea.getCode().equals("PRODUCT_PACKAGING")) {
+                        } else if (callArea.getCode().indexOf("PRODUCT_PACKAGING") > -1) {
                             // 包装区
                             waveDetailModel.setAreaType(2);
                         }
@@ -322,13 +319,17 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
                     callMaterial.setCallTime(newDate);
                     insertDetails.add(callMaterial);
                 });
+                if (CollectionUtils.isEmpty(insertDetails)) {
+                    Tracker.agv(String.format("叫料失败：波次中没有波次详情！站点: %s  产线：%s", callButtonModel.getSiteId(), callLine.getCode()));
+                    return "叫料失败";
+                }
                 insertBatch(insertDetails);
                 Tracker.agv(String.format("新增了叫料。站点: %s  产线：%s", callButtonModel.getSiteId(), callLine.getCode()));
-                return true;
+                return "success";
             }
         }
         Tracker.agv("已经没有未叫料的波次了！");
-        return false;
+        return "叫料失败：无波次！";
     }
 
     /**
@@ -344,13 +345,14 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
         AgvAreaModel callArea = agvAreaDao.selectParentAreaById(callLine.getId());
         DeliveryTaskModel deliveryTaskModel = new DeliveryTaskModel();
         deliveryTaskModel.setStartSiteId(callButtonModel.getSiteId());
-        if (callArea.getCode().equals("PRODUCT_FILLING")) {
-            Tracker.agv(String.format("灌装区：执行 %s 退货", callButtonModel.getName()));
+        deliveryTaskModel.setAreaCoding(callArea.getCode().substring(0, 2));
+        if (callArea.getCode().indexOf("PRODUCT_FILLING") > -1) {
+            Tracker.agv(String.format("%s-灌装区：执行 %s 退货", callArea.getCode().substring(0, 2), callButtonModel.getName()));
             // 灌装区退回
             deliveryTaskModel.setType(2);
             return deliveryTaskService.addDeliveryTask(deliveryTaskModel);
-        } else if (callArea.getCode().equals("PRODUCT_PACKAGING")) {
-            Tracker.agv(String.format("包装区：执行 %s 退货", callButtonModel.getName()));
+        } else if (callArea.getCode().indexOf("PRODUCT_PACKAGING") > -1) {
+            Tracker.agv(String.format("%s-包装区：执行 %s 退货", callArea.getCode().substring(0, 2), callButtonModel.getName()));
             // 包装区退回
             deliveryTaskModel.setType(6);
             return deliveryTaskService.addDeliveryTask(deliveryTaskModel);
@@ -361,24 +363,26 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
     /**
      * 通过波次编码以及区域类型获取叫料列表
      *
-     * @param waveCode 波次编码
-     * @param areaType 区域类型
+     * @param waveCode   波次编码
+     * @param areaType   区域类型
+     * @param areaCoding 区域编码
      * @return 叫料列表
      */
-    public List<CallMaterialModel> selectCallMaterialByWaveCodeAndAreaType(String waveCode, int areaType, Integer state) {
-        return callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(waveCode, areaType, state);
+    public List<CallMaterialModel> selectCallMaterialByWaveCodeAndAreaType(String waveCode, int areaType, Integer state, String areaCoding) {
+        return callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(waveCode, areaType, state, areaCoding);
     }
 
     /**
      * 获取未配送的已叫料波次
      *
+     * @param areaCode 区域编号  3B_WAREHOUSE、3B_DISINFECTION、3C_WAREHOUSE、3C_DISINFECTION
      * @return
      */
     public List<CallMaterialModel> selectUnDeliveryWaves(String areaCode) {
         List<CallMaterialModel> backCallModels = new ArrayList<>();
-        if (!StringUtils.isEmpty(areaCode) && "3C_DISINFECTION".equalsIgnoreCase(areaCode)) {
+        if (!StringUtils.isEmpty(areaCode) && areaCode.indexOf("DISINFECTION") > -1) {
             // 灌装区未配送叫料列表
-            List<CallMaterialModel> fillingUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 1, 1);
+            List<CallMaterialModel> fillingUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 1, 1, areaCode.substring(0, 2));
             Map<String, CallMaterialModel> map = new HashMap<>();
             if (!CollectionUtils.isEmpty(fillingUnDeliveryCalls)) {
                 fillingUnDeliveryCalls.forEach(callModel -> {
@@ -399,9 +403,9 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
             }
         } else {
             // 拆包间未配送叫料列表
-            List<CallMaterialModel> unpackUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 4, 1);
+            List<CallMaterialModel> unpackUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 4, 1, areaCode.substring(0, 2));
             // 包装区未配送叫料列表
-            List<CallMaterialModel> packageUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 2, 1);
+            List<CallMaterialModel> packageUnDeliveryCalls = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(null, 2, 1, areaCode.substring(0, 2));
             Map<String, CallMaterialModel> map = new HashMap<>();
             if (!CollectionUtils.isEmpty(unpackUnDeliveryCalls)) {
                 unpackUnDeliveryCalls.forEach(callModel -> {
@@ -457,5 +461,53 @@ public class CallMaterialService extends BaseService<CallMaterialDao, CallMateri
      */
     public boolean updateCallMaterialStateByWaveCode(String waveCode, int type, int state) {
         return callMaterialDao.updateCallMaterialStateByWaveCode(waveCode, type, state);
+    }
+
+    /**
+     * 按钮盒子叫料
+     *
+     * @param ip         IP地址
+     * @param requestIp  请求者IP
+     * @param deviceKey  设备唯一码
+     * @param buttonCode 按钮编号
+     * @return 操作结果
+     */
+    public String callMaterialByButtonBox(String ip, String requestIp, String deviceKey, String buttonCode) {
+        String ipAddress;
+        // 查找出按钮盒子对象；通过按钮编号查找对应的区域以及对应的站点；
+        CallButtonModel callButtonModel;
+        if (!StringUtils.isEmpty(ip)) {
+            ipAddress = ip;
+        } else {
+            ipAddress = requestIp;
+        }
+        if (StringUtils.isEmpty(deviceKey)) {
+            callButtonModel = callButtonDao.selectCallButtonAreaByIpAddressOrDeviceKey(ipAddress, deviceKey, buttonCode);
+        } else {
+            callButtonModel = callButtonDao.selectCallButtonAreaByIpAddressOrDeviceKey(null, deviceKey, buttonCode);
+        }
+        if (ObjectUtils.isEmpty(callButtonModel)) {
+            Tracker.agv(String.format("按钮盒子不存在，请确认参数:ip-%s;requestIp-%s;deviceKey-%s;buttonCode-%s", ip, requestIp, deviceKey, buttonCode));
+            return "请求失败，请确认按钮盒子信息";
+        }
+        Tracker.agv(String.format("按钮盒子发起请求：%s", callButtonModel.getName()));
+        // 通过按钮盒子编号判断是叫料还是退料车
+        String resultString = "";
+        if (callButtonModel.getCode().indexOf("CALL") > -1) {
+            // 执行叫料
+            resultString = callMaterial(callButtonModel);
+            Tracker.agv("执行" + callButtonModel.getName() + "的逻辑。");
+        } else if (callButtonModel.getCode().indexOf("BACK") > -1) {
+            try {
+                // 执行退货
+                resultString = backMaterialBox(callButtonModel);
+                Tracker.agv("执行退货");
+            } catch (Exception e) {
+                resultString = "退货失败：出现异常";
+                Tracker.error(e);
+            }
+        }
+        Tracker.agv(String.format("按钮盒子操作结果：%s", resultString));
+        return resultString;
     }
 }

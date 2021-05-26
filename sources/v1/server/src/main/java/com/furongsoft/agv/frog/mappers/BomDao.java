@@ -85,8 +85,9 @@ public interface BomDao extends BaseMapper<Bom> {
         public String selectBomByMaterialUuid() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.material_code,t1.full_count,t1.version,t1.update_state");
+                    SELECT("t1.id,t1.material_code,t1.full_count,t1.version,t1.update_state, t2.name AS materialName");
                     FROM(BOM_TABLE_NAME + " t1");
+                    LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_code = t2.uuid");
                     WHERE("t1.material_code=#{materialCode} AND t1.enabled=1");
                 }
             }.toString();

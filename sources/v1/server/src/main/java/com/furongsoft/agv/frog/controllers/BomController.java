@@ -41,7 +41,7 @@ public class BomController {
      */
     @GetMapping("/bom/getBomDetails")
     public RestResponse selectBomDetailsByBomId(@NotNull long bomId) {
-        return new RestResponse(HttpStatus.OK, null, bomService.selectBomDetailsByBomId(bomId));
+        return new RestResponse(HttpStatus.OK, null, bomService.selectBomDetailModelsByBomId(bomId));
     }
 
     /**

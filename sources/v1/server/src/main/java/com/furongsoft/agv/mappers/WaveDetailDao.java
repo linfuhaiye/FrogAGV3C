@@ -130,7 +130,7 @@ public interface WaveDetailDao extends BaseMapper<WaveDetail> {
                     SELECT("t1.id,t1.code,t1.wave_code,t1.material_id,t1.count,t2.name AS materialName,t2.uuid AS materialCode");
                     FROM(WAVE_DETAIL_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_id = t2.id");
-                    WHERE("t1.wave_code = #{waveCode} AND t1.enabled = 1");
+                    WHERE("t1.wave_code = #{waveCode} AND t1.enabled = 1 AND t2.enabled = 1");
                 }
             }.toString();
         }

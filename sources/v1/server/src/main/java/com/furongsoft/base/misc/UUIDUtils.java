@@ -47,9 +47,10 @@ public class UUIDUtils {
     /**
      * 获取8位UUID
      *
-     * @return
+     * @return UUID
      */
     public static String getShortUuid() {
+        // TODO: from database
         StringBuffer stringBuffer = new StringBuffer();
         String uuid = getUUID();
         for (int i = 0; i < 8; i++) {
@@ -57,6 +58,7 @@ public class UUIDUtils {
             int x = Integer.parseInt(str, 16);
             stringBuffer.append(chars[x % 0x3E]);
         }
+
         return stringBuffer.toString();
     }
 }

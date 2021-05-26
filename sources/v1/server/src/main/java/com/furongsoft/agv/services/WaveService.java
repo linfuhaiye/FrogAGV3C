@@ -8,6 +8,7 @@ import com.furongsoft.agv.models.AgvAreaModel;
 import com.furongsoft.agv.models.WaveDetailModel;
 import com.furongsoft.agv.models.WaveModel;
 import com.furongsoft.base.misc.DateUtils;
+import com.furongsoft.base.misc.Tracker;
 import com.furongsoft.base.misc.UUIDUtils;
 import com.furongsoft.base.services.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 波次服务
@@ -56,14 +54,17 @@ public class WaveService extends BaseService<WaveDao, Wave> {
     /**
      * 根据条件获取波次列表（默认获取未完成的）
      *
-     * @param type   类型[1：灌装区；2：包装区；]
-     * @param teamId 班组唯一标识
-     * @param state  状态[0：未配送；1：配送中；2：已完成]
+     * @param type          类型[1：灌装区；2：包装区；]
+     * @param teamId        班组唯一标识
+     * @param state         状态[0：未配送；1：配送中；2：已完成]
+     * @param areaCoding    区域编码（3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 波次列表
      */
-    public List<WaveModel> selectWaveModels(int type, String teamId, Integer state, String productLine, String executionTime) {
+    public List<WaveModel> selectWaveModels(int type, String teamId, Integer state, String areaCoding, String productLine, String executionTime) {
         Map<String, WaveModel> waveModelMap = new HashMap<>();
-        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, productLine, executionTime);
+        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, areaCoding, productLine, executionTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         waveModels.forEach(waveModel -> {
             List<WaveDetailModel> waveDetailModels = waveDetailService.selectWaveDetails(waveModel.getCode());
@@ -98,13 +99,16 @@ public class WaveService extends BaseService<WaveDao, Wave> {
     /**
      * 获取波次计划
      *
-     * @param type   类型
-     * @param state  状态
-     * @param teamId 班组唯一标识
+     * @param type          类型
+     * @param state         状态
+     * @param teamId        班组唯一标识
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 波次计划集合
      */
-    public List<WaveModel> selectWaveModelsPlan(int type, String teamId, Integer state, String productLine, String executionTime) {
-        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, productLine, executionTime);
+    public List<WaveModel> selectWaveModelsPlan(int type, String teamId, Integer state, String areaCoding, String productLine, String executionTime) {
+        List<WaveModel> waveModels = waveDao.selectWaveModels(type, teamId, state, areaCoding, productLine, executionTime);
         waveModels.forEach(waveModel -> {
             List<WaveDetailModel> waveDetailModels = waveDetailService.selectWaveDetails(waveModel.getCode());
             waveModel.setWaveDetailModels(waveDetailModels);
@@ -115,16 +119,28 @@ public class WaveService extends BaseService<WaveDao, Wave> {
     /**
      * 获取叫料计划
      *
-     * @param waveType 波次计划类型（1：灌装区；2：包装区）
-     * @param callType 叫料类型（3：消毒间；4：拆包间）
+     * @param waveType      波次计划类型（1：灌装区；2：包装区）
+     * @param callType      叫料类型（3：消毒间；4：拆包间）
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 叫料计划
      */
-    public List<WaveModel> selectCallPlan(int waveType, int callType, String productLine, String executionTime) {
+    public List<WaveModel> selectCallPlan(int waveType, int callType, String areaCoding, String productLine, String executionTime, Integer maxBackNumber) {
+        if (null == maxBackNumber) {
+            maxBackNumber = 5;
+        }
         Map<String, WaveModel> waveModelMap = new HashMap<>();
         // 找出所有未完成配送的波次
-        List<WaveModel> waveModels = waveDao.selectWaveModels(waveType, null, 0, productLine, executionTime);
+        List<WaveModel> waveModels = waveDao.selectWaveModels(waveType, null, 0, areaCoding, productLine, executionTime);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Integer finalMaxBackNumber = maxBackNumber;
         waveModels.forEach(waveModel -> {
+            String waveKey = waveModel.getTeamId().concat("_").concat(sdf.format(waveModel.getExecutionTime())).concat("_").concat(waveModel.getProductLineCode()).concat("_").concat(String.valueOf(waveModel.getMaterialId()));
+            WaveModel waveModel1 = waveModelMap.get(waveKey);
+            if (null != waveModel1 && !CollectionUtils.isEmpty(waveModel1.getWaveModels()) && waveModel1.getWaveModels().size() > finalMaxBackNumber) {
+                return;
+            }
             // 所有波次详情
             List<WaveDetailModel> waveDetailModels = waveDetailService.selectWaveDetails(waveModel.getCode());
             if (!CollectionUtils.isEmpty(waveDetailModels)) {
@@ -135,7 +151,7 @@ public class WaveService extends BaseService<WaveDao, Wave> {
                     // 将已叫料的波次详情放入Map种
                     callWaveDetailModels.forEach(callWaveDetailModel -> {
                         waveDetailModelMap.put(callWaveDetailModel.getCode(), callWaveDetailModel);
-                        // 叫料如果未完成
+                        // 叫料如果不是处于未配送
                         if (null != callWaveDetailModel.getCallState() && callWaveDetailModel.getCallState() != 1) {
                             waveModel.setDelivered(true);
                         }
@@ -155,8 +171,6 @@ public class WaveService extends BaseService<WaveDao, Wave> {
                 }
                 waveModel.setWaveDetailModels(waveDetailModels);
             }
-            String waveKey = waveModel.getTeamId().concat("_").concat(sdf.format(waveModel.getExecutionTime())).concat("_").concat(waveModel.getProductLineCode()).concat("_").concat(String.valueOf(waveModel.getMaterialId()));
-            WaveModel waveModel1 = waveModelMap.get(waveKey);
             if (null != waveModel1) {
                 if (CollectionUtils.isEmpty(waveModel1.getWaveModels())) {
                     List<WaveModel> newWaveModels = new ArrayList<>();
@@ -336,11 +350,12 @@ public class WaveService extends BaseService<WaveDao, Wave> {
      *
      * @param productOrderNo 生产单号(MO号)
      * @param lineCode       切换的产线
+     * @param areaCoding     区域编码
      * @return 提示信息
      */
-    public String waveChangeLine(String productOrderNo, String lineCode) {
-        AgvAreaModel fillingArea = siteService.selectProductLocationByAreaCodeAndLineCode("PRODUCT_FILLING", lineCode); // 灌装区产线
-        AgvAreaModel packageArea = siteService.selectProductLocationByAreaCodeAndLineCode("PRODUCT_PACKAGING", lineCode); // 包装区产线
+    public String waveChangeLine(String productOrderNo, String lineCode, String areaCoding) {
+        AgvAreaModel fillingArea = siteService.selectProductLocationByAreaCodeAndLineCode(areaCoding + "_PRODUCT_FILLING", lineCode); // 灌装区产线
+        AgvAreaModel packageArea = siteService.selectProductLocationByAreaCodeAndLineCode(areaCoding + "_PRODUCT_PACKAGING", lineCode); // 包装区产线
         if (ObjectUtils.isEmpty(fillingArea)) {
             return "所选产线出错，请重选";
         }

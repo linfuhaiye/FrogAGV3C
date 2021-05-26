@@ -45,13 +45,16 @@ public interface WaveDao extends BaseMapper<Wave> {
     /**
      * 查找波次信息
      *
-     * @param type   类型[1：灌装区；2：包装区]
-     * @param teamId 班组ID
-     * @param state  状态[0：未配送；1：配送中；2：已完成]
+     * @param type          类型[1：灌装区；2：包装区]
+     * @param teamId        班组ID
+     * @param state         状态[0：未配送；1：配送中；2：已完成]
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 波次信息集合
      */
     @SelectProvider(type = DaoProvider.class, method = "selectWaveModels")
-    List<WaveModel> selectWaveModels(@Param("type") int type, @Param("teamId") String teamId, @Param("state") Integer state, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
+    List<WaveModel> selectWaveModels(@Param("type") int type, @Param("teamId") String teamId, @Param("state") Integer state, @Param("areaCoding") String areaCoding, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
 
     /**
      * 通过日期查询波次信息
@@ -190,7 +193,7 @@ public interface WaveDao extends BaseMapper<Wave> {
                     FROM(WAVE_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_id = t2.id");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t3 ON t1.area_id = t3.id");
-                    WHERE("t1.enabled=1 and t1.type = #{type} ");
+                    WHERE("t1.enabled=1 AND t1.type = #{type} AND t3.code LIKE CONCAT('%',#{areaCoding},'%')");
                     if (!StringUtils.isNullOrEmpty(param.get("teamId"))) {
                         WHERE("t1.team_id = #{teamId}");
                     }
@@ -241,7 +244,7 @@ public interface WaveDao extends BaseMapper<Wave> {
                 {
                     UPDATE(WAVE_TABLE_NAME);
                     SET("enabled = 0");
-                    StringBuffer sql = new StringBuffer();
+                    StringBuilder sql = new StringBuilder();
                     List<Long> ids = (List<Long>) param.get("ids");
                     sql.append(" id in (");
                     sql.append(org.apache.commons.lang3.StringUtils.join(ids, ","));
@@ -332,7 +335,7 @@ public interface WaveDao extends BaseMapper<Wave> {
                     FROM(WAVE_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t2 ON t1.material_id = t2.id");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t3 ON t1.area_id = t3.id");
-                    WHERE("t1.enabled=1 and t1.production_order_no = #{productionOrderNo} ");
+                    WHERE("t1.enabled=1 and t2.enabled=1 and t1.production_order_no = #{productionOrderNo} ");
                 }
             }.toString();
         }

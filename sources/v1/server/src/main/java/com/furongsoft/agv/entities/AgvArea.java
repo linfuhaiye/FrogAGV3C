@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 import com.furongsoft.base.entities.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,6 +19,7 @@ import javax.persistence.Id;
 @TableName("t_agv_area")
 @Getter
 @Setter
+@ToString
 public class AgvArea extends BaseEntity {
     @Id
     @GeneratedValue

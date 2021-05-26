@@ -42,14 +42,18 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
     /**
      * 根据条件获取叫料列表（默认获取未完成的）
      *
-     * @param type   叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
-     * @param state  状态[1：未配送；2：配送中；3：已完成；4：已取消]
-     * @param teamId 班组唯一标识
-     * @param areaId 区域ID（产线ID）
+     * @param type          叫料类型[1：灌装区；2：包装区；3：消毒间；4：拆包间]
+     * @param state         状态[1：未配送；2：配送中；3：已完成；4：已取消]
+     * @param teamId        班组唯一标识
+     * @param areaId        区域ID（产线ID）
+     * @param siteId        站点ID
+     * @param areaCoding    区域编码 （3B、3C）
+     * @param productLine   生产线
+     * @param executionTime 执行日期
      * @return 叫料列表
      */
     @SelectProvider(type = DaoProvider.class, method = "selectCallMaterialsByConditions")
-    List<CallMaterialModel> selectCallMaterialsByConditions(@Param("type") int type, @Param("state") Integer state, @Param("teamId") String teamId, @Param("areaId") Long areaId, @Param("siteId") Long siteId, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
+    List<CallMaterialModel> selectCallMaterialsByConditions(@Param("type") int type, @Param("state") Integer state, @Param("teamId") String teamId, @Param("areaId") Long areaId, @Param("siteId") Long siteId, @Param("areaCoding") String areaCoding, @Param("productLine") String productLine, @Param("executionTime") String executionTime);
 
     /**
      * 通过波次详情编码以及区域类型获取叫料信息
@@ -69,7 +73,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
      * @return 叫料列表
      */
     @SelectProvider(type = DaoProvider.class, method = "selectCallMaterialByWaveCodeAndAreaType")
-    List<CallMaterialModel> selectCallMaterialByWaveCodeAndAreaType(@Param("waveCode") String waveCode, @Param("areaType") int areaType, @Param("state") Integer state);
+    List<CallMaterialModel> selectCallMaterialByWaveCodeAndAreaType(@Param("waveCode") String waveCode, @Param("areaType") int areaType, @Param("state") Integer state, @Param("areaCoding") String areaCoding);
 
     /**
      * 通过ID对叫料信息进行伪删除
@@ -123,7 +127,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
      * 通过站点ID和状态查找叫料列表
      *
      * @param siteId 站点ID
-     * @param state  状态
+     * @param state  状态[1：未配送；2：配送中；3：已完成；4：已取消]
      * @return 叫料列表
      */
     @SelectProvider(type = DaoProvider.class, method = "selectCallMaterialBySiteAndState")
@@ -183,7 +187,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
                     LEFT_OUTER_JOIN(WAVE_TABLE_NAME + " t4 ON t4.code = t3.wave_code");
                     LEFT_OUTER_JOIN(MATERIAL_TABLE_NAME + " t5 ON t4.material_id = t5.id ");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t6 ON t1.area_id = t6.id");
-                    WHERE("t1.enabled = 1 and t1.type=#{type} and t3.enabled=1 and t4.enabled=1 and t4.state <> 2");
+                    WHERE("t1.enabled = 1 and t1.type=#{type} and t3.enabled=1 and t4.enabled=1 and t4.state <> 2 AND t6.code LIKE CONCAT('%', #{areaCoding}, '%')");
                     if (null != param.get("state") && (int) param.get("state") == 0) {
                         WHERE("t1.state <> 3 AND t1.state <>4");
                     } else if (null != param.get("state")) {
@@ -254,7 +258,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
         }
 
         /**
-         * 通过波次编码以及区域类型获取叫料列表  TODO sql优化。过滤已完成的波次
+         * 通过波次编码以及区域类型获取叫料列表
          *
          * @return sql
          */
@@ -267,7 +271,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
                     LEFT_OUTER_JOIN(WAVE_DETAIL_TABLE_NAME + " t2 ON t1.wave_detail_code = t2.code");
                     LEFT_OUTER_JOIN(WAVE_TABLE_NAME + " t3 ON t2.wave_code = t3.code");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t4 ON t1.area_id = t4.id");
-                    WHERE("t1.type = #{areaType} AND t1.enabled = 1 AND t2.enabled=1 AND t3.enabled=1 AND t3.state <> 2");
+                    WHERE("t1.type = #{areaType} AND t1.enabled = 1 AND t2.enabled=1 AND t3.enabled=1 AND t3.state <> 2 AND t4.code LIKE CONCAT('%',#{areaCoding},'%')");
                     if (!StringUtils.isNullOrEmpty(params.get("waveCode"))) {
                         WHERE("t3.code= #{waveCode}");
                     }
@@ -348,7 +352,7 @@ public interface CallMaterialDao extends BaseMapper<CallMaterial> {
                     FROM(CALL_MATERIAL_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(WAVE_DETAIL_TABLE_NAME + " t2 ON t1.wave_detail_code = t2.code");
                     LEFT_OUTER_JOIN(WAVE_TABLE_NAME + " t3 ON t2.wave_code = t3.code");
-                    WHERE("t1.enabled= 1 AND t1.site_id=#{siteId} AND t1.state=#{state} AND t2.enabled=1 AND t3.enabled = 1");
+                    WHERE("t1.enabled= 1 AND t1.site_id=#{siteId} AND t1.state=#{state} AND t2.enabled=1 AND t3.enabled = 1 AND t3.state <> 2");
                 }
             }.toString();
         }

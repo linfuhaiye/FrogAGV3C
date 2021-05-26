@@ -6,6 +6,7 @@ import com.furongsoft.agv.schedulers.entities.Task;
 import com.furongsoft.agv.schedulers.geekplus.entities.MovingCallbackMsg;
 import com.furongsoft.base.entities.RestResponse;
 import com.furongsoft.base.misc.Tracker;
+import com.furongsoft.base.monitor.aop.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/agv")
-//@Log
+@Log
 public class SchedulerController {
     @Autowired
     private IScheduler scheduler;
@@ -33,7 +34,7 @@ public class SchedulerController {
      */
     @PostMapping("/callback")
     public RestResponse movingCallbackMsg(@RequestBody MovingCallbackMsg movingCallbackMsg) {
-        Tracker.agv(movingCallbackMsg);
+        Tracker.agv(String.format("callback:%s", movingCallbackMsg.toString()));
         MovingCallbackMsg.Body body = movingCallbackMsg.getBody();
         switch (body.getWorkflowPhase()) {
             case 20:
@@ -92,6 +93,17 @@ public class SchedulerController {
     @GetMapping("/removeTaskBySource")
     public RestResponse removeTaskBySource(String source) {
         return new RestResponse(HttpStatus.OK, null, scheduler.removeTaskBySource(source));
+    }
+
+    /**
+     * 通过搬运系统ID取消任务
+     *
+     * @param wcsTaskId 搬运系统ID
+     * @return 响应内容
+     */
+    @GetMapping("/cancel/task")
+    public RestResponse cancelTaskByWcsTaskId(String wcsTaskId) {
+        return new RestResponse(HttpStatus.OK, null, scheduler.cancelTaskByWcsTaskId(wcsTaskId));
     }
 
     /**

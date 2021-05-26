@@ -1,5 +1,6 @@
 package com.furongsoft.agv.frog.entities;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.furongsoft.base.entities.BaseEntity;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 /**
  * BOM清单信息
@@ -51,6 +53,25 @@ public class BomDetail extends BaseEntity {
      * 是否启用
      */
     private Integer enabled;
+
+    /**
+     * 满车数量
+     */
+    private Integer fullCount;
+
+    /**
+     * 物料名称
+     */
+    @Transient
+    @TableField(exist = false)
+    private String materialName;
+
+    /**
+     * 物料ID
+     */
+    @Transient
+    @TableField(exist = false)
+    private Integer materialId;
 
     public BomDetail(long bomId, String materialCode, int count, int type, Integer enabled) {
         this.bomId = bomId;

@@ -6,6 +6,7 @@ import com.furongsoft.agv.devices.entities.CallButton;
 import com.furongsoft.agv.devices.model.CallButtonModel;
 import com.furongsoft.agv.entities.AgvArea;
 import com.furongsoft.agv.entities.Site;
+import com.furongsoft.base.misc.StringUtils;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.SelectProvider;
@@ -42,11 +43,13 @@ public interface CallButtonDao extends BaseMapper<CallButton> {
     /**
      * 通过IP地址查找按钮所属区域
      *
-     * @param ipAddress ip地址
+     * @param ipAddress  ip地址
+     * @param deviceKey  设备唯一表示
+     * @param buttonCode 按钮编号
      * @return 按钮信息
      */
-    @SelectProvider(type = DaoProvider.class, method = "selectCallButtonAreaByIpAddress")
-    CallButtonModel selectCallButtonAreaByIpAddress(@Param("ipAddress") String ipAddress, @Param("buttonCode") String buttonCode);
+    @SelectProvider(type = DaoProvider.class, method = "selectCallButtonAreaByIpAddressOrDeviceKey")
+    CallButtonModel selectCallButtonAreaByIpAddressOrDeviceKey(@Param("ipAddress") String ipAddress, @Param("deviceKey") String deviceKey, @Param("buttonCode") String buttonCode);
 
     /**
      * 查找按钮
@@ -71,7 +74,7 @@ public interface CallButtonDao extends BaseMapper<CallButton> {
         public String selectCallButtonById() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.ip_address,t1.port,t1.button_code,t1.site_id,t1.code,t1.name");
+                    SELECT("t1.id,t1.ip_address,t1.device_key,t1.port,t1.button_code,t1.site_id,t1.code,t1.name");
                     FROM(CALL_BUTTON_TABLE_NAME + " t1");
                     WHERE("t1.id = #{id}");
                 }
@@ -86,7 +89,7 @@ public interface CallButtonDao extends BaseMapper<CallButton> {
         public String selectCallButtonByCode(final Map<String, Object> param) {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.ip_address,t1.port,t1.button_code,t1.site_id,t1.code,t1.name");
+                    SELECT("t1.id,t1.ip_address,t1.device_key,t1.port,t1.button_code,t1.site_id,t1.code,t1.name");
                     FROM(CALL_BUTTON_TABLE_NAME + " t1");
                     WHERE("t1.code = #{code}");
                 }
@@ -98,14 +101,23 @@ public interface CallButtonDao extends BaseMapper<CallButton> {
          *
          * @return sql
          */
-        public String selectCallButtonAreaByIpAddress() {
+        public String selectCallButtonAreaByIpAddressOrDeviceKey(final Map<String, Object> params) {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.ip_address,t1.port,t1.button_code,t1.site_id,t1.code,t1.name,t3.name AS areaName,t3.id AS areaId, t3.type AS areaType");
+                    SELECT("t1.id,t1.ip_address,t1.device_key,t1.port,t1.button_code,t1.site_id,t1.code,t1.name,t3.name AS areaName,t3.id AS areaId, t3.type AS areaType");
                     FROM(CALL_BUTTON_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(AREA_SITE_TABLE_NAME + " t2 ON t2.site_id = t1.site_id");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t3 ON t2.area_id = t3.id");
-                    WHERE("t1.ip_address = #{ipAddress} AND t1.button_code = #{buttonCode}");
+                    WHERE("t1.button_code = #{buttonCode}");
+                    if ((StringUtils.isNullOrEmpty(params.get("ipAddress"))) && (StringUtils.isNullOrEmpty(params.get("deviceKey")))) {
+                        WHERE("t1.ip_address = #{ipAddress}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(params.get("ipAddress"))) {
+                        WHERE("t1.ip_address = #{ipAddress}");
+                    }
+                    if (!StringUtils.isNullOrEmpty(params.get("deviceKey"))) {
+                        WHERE("t1.device_key = #{deviceKey}");
+                    }
                 }
             }.toString();
         }
@@ -118,7 +130,7 @@ public interface CallButtonDao extends BaseMapper<CallButton> {
         public String selectCallButtons() {
             return new SQL() {
                 {
-                    SELECT("t1.id,t1.ip_address,t1.port,t1.button_code,t1.site_id,t1.code,t1.name,t3.name AS areaName,t3.id AS areaId, t3.type AS areaType");
+                    SELECT("t1.id,t1.ip_address,t1.device_key,t1.port,t1.button_code,t1.site_id,t1.code,t1.name,t3.name AS areaName,t3.id AS areaId, t3.type AS areaType");
                     FROM(CALL_BUTTON_TABLE_NAME + " t1");
                     LEFT_OUTER_JOIN(AREA_SITE_TABLE_NAME + " t2 ON t2.site_id = t1.site_id");
                     LEFT_OUTER_JOIN(AGV_AREA_TABLE_NAME + " t3 ON t2.area_id = t3.id");

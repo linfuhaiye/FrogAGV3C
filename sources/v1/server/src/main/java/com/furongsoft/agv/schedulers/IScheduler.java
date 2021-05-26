@@ -197,10 +197,16 @@ public interface IScheduler {
     boolean removeTaskBySource(String source);
 
     /**
+     * 通过源站点删除任务
+     *
+     * @return 是否成功
+     */
+    boolean cancelTaskByWcsTaskId(String wcsTaskId);
+
+    /**
      * 移除站点上的容器
      *
      * @param siteCode 站点编号
-     * @return 是否成功
      */
     void removeSiteContainer(String siteCode);
 
@@ -215,7 +221,7 @@ public interface IScheduler {
     /**
      * 获取所有区域
      *
-     * @return
+     * @return 所有区域
      */
     List<Area> getAreas();
 }

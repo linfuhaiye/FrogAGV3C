@@ -154,4 +154,8 @@ qwwz:
   version: 1.0
   pkCorp: 1006
 
+button-box:
+  url: http://192.168.2.90:9090/api/v1/agv
+  coding_format: UTF-8
+
 env: pro

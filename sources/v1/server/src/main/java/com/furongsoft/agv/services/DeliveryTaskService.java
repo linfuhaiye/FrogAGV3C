@@ -80,7 +80,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             case 1: { // 消毒-灌装;
                 taskNo = "PS" + currentTime;
                 // 获取灌装区指定生产线的库位列表
-                AgvAreaModel location = siteService.selectProductLocationByAreaCodeAndLineCode("PRODUCT_FILLING",
+                AgvAreaModel location = siteService.selectProductLocationByAreaCodeAndLineCode(deliveryTaskModel.getAreaCoding() + "_PRODUCT_FILLING",
                         deliveryTaskModel.getProductLine());
                 // 找到指定产线的库位区域
                 List<AgvAreaModel> agvAreaModels = siteService.selectAreasByParentId(location.getId(), 8);
@@ -93,12 +93,10 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                 if (deliveryTaskModel.getEndSiteId() > 0) {
                     // 站点未配送的叫料集合
                     List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(1, 1,
-                            null, null, deliveryTaskModel.getEndSiteId(), null, null);
+                            null, null, deliveryTaskModel.getEndSiteId(), deliveryTaskModel.getAreaCoding(), null, null);
                     MaterialBoxModel materialBoxModel = siteService.selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
-//                    Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-//                            deliveryTaskModel.getEndSiteId(), materialBoxModel.getId(), "消毒-灌装下发配送任务失败。", true, materialBoxMaterialModels);
                     Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-                            deliveryTaskModel.getEndSiteId(), 0, "消毒-灌装下发配送任务失败。", true, materialBoxMaterialModels);
+                            deliveryTaskModel.getEndSiteId(), "消毒配送失败。", true, materialBoxMaterialModels);
                     if (ObjectUtils.isEmpty(task)) {
                         return "发货失败";
                     }
@@ -147,16 +145,14 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                     for (SiteModel siteModel : siteModels) {
                         // 站点未配送的叫料集合
                         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(1, 1,
-                                null, null, siteModel.getId(), null, null);
+                                null, null, siteModel.getId(), deliveryTaskModel.getAreaCoding(), null, null);
                         if (CollectionUtils.isEmpty(callMaterialModels)) {
                             continue;
                         }
                         MaterialBoxModel materialBoxModel = siteService
                                 .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
-//                        Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-//                                siteModel.getId(), materialBoxModel.getId(), "消毒-灌装下发配送任务失败。", true, materialBoxMaterialModels);
                         Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-                                siteModel.getId(), 0, "消毒-灌装下发配送任务失败。", true, materialBoxMaterialModels);
+                                siteModel.getId(), "消毒配送失败。", true, materialBoxMaterialModels);
                         if (ObjectUtils.isEmpty(task)) {
                             continue;
                         }
@@ -169,13 +165,13 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                         // 更新叫料状态为配送中
                         Map<String, List<CallMaterialModel>> maps = new HashMap<>();
                         callMaterialModels.forEach(callMaterialModel -> {
-                            List<CallMaterialModel> exitstCalls = maps.get(callMaterialModel.getWaveCode());
-                            if (null != exitstCalls) {
+                            List<CallMaterialModel> existCalls = maps.get(callMaterialModel.getWaveCode());
+                            if (null == existCalls) {
                                 List<CallMaterialModel> newCalls = new ArrayList<>();
                                 newCalls.add(callMaterialModel);
                                 maps.put(callMaterialModel.getWaveCode(), newCalls);
                             } else {
-                                exitstCalls.add(callMaterialModel);
+                                existCalls.add(callMaterialModel);
                             }
                         });
                         boolean updatedFlag = false;
@@ -206,9 +202,8 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             }
             case 2: { // 灌装-消毒;
                 taskNo = "TH" + currentTime;
-//                AgvArea agvArea = siteService.selectAgvAreaByCode("XD_LOCATION");
-                AgvArea agvArea = siteService.selectAgvAreaByCode("XD_EMPTY_LOCATION");
-                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, 0, "灌装-消毒下发退货任务失败。", false, null);
+                AgvArea agvArea = siteService.selectAgvAreaByCode(deliveryTaskModel.getAreaCoding() + "_XD_EMPTY_LOCATION");
+                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, "退货失败。", false, null);
                 if (ObjectUtils.isEmpty(task)) {
                     return "发货失败";
                 }
@@ -226,19 +221,17 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             case 3: { // 包材-拆包;
                 Tracker.agv("向拆包间发货");
                 taskNo = "PS" + currentTime;
-                AgvArea agvArea = siteService.selectAgvAreaByCode("CB_LOCATION");
+                AgvArea agvArea = siteService.selectAgvAreaByCode(deliveryTaskModel.getAreaCoding() + "_CB_LOCATION");
                 // 获取拆包间叫料信息
                 List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(4, 1, null,
-                        null, null, null, null);
+                        null, null, deliveryTaskModel.getAreaCoding(), null, null);
                 if (CollectionUtils.isEmpty(callMaterialModels)) {
                     Tracker.error("包材-拆包配送失败。拆包间无叫料");
-//                    throw new BaseException("拆包间无未配送的叫料请求,无法发货");
                     return "包材-拆包配送失败。拆包间无叫料";
                 }
                 MaterialBoxModel materialBoxModel = siteService
-                        .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());// TODO 下一行空
-//                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, materialBoxModel.getId(), "包材-拆包下发送货任务失败。", true, materialBoxMaterialModels);
-                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, 0, "包材-拆包下发送货任务失败。", true, materialBoxMaterialModels);
+                        .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
+                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, "包材-拆包配货失败。", true, materialBoxMaterialModels);
                 Tracker.agv(String.format("向拆包发货：%s", task.toString()));
                 if (ObjectUtils.isEmpty(task)) {
                     return "发货失败";
@@ -259,16 +252,15 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             case 4: { // 拆包-包材;
                 taskNo = "TH" + currentTime;
                 // 查找包材公用空库位
-                AgvArea agvArea = siteService.selectAgvAreaByCode("BC_PUBLIC_EMPTY_LOCATION");
-//                AgvArea agvArea = siteService.selectAgvAreaByCode("BC_EMPTY_LOCATION");
-                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, 0, "拆包-包材下发退货任务失败。", false, null);
+                AgvArea agvArea = siteService.selectAgvAreaByCode(deliveryTaskModel.getAreaCoding() + "_BC_PUBLIC_EMPTY_LOCATION");
+                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, "拆包-包材退货失败。", false, null);
                 if (ObjectUtils.isEmpty(task)) {
                     return "发货失败";
                 }
                 if (!StringUtils.isNullOrEmpty(task.getFailReason())) {
                     // 如果公用空库位发货失败，则选择其余空库位上
-                    agvArea = siteService.selectAgvAreaByCode("BC_EMPTY_LOCATION");
-                    task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, 0, "拆包-包材下发退货任务失败。", false, null);
+                    agvArea = siteService.selectAgvAreaByCode(deliveryTaskModel.getAreaCoding() + "_BC_EMPTY_LOCATION");
+                    task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, "拆包-包材退货失败。", false, null);
                     if (ObjectUtils.isEmpty(task)) {
                         return "发货失败";
                     }
@@ -286,7 +278,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             }
             case 5: { // 包材-包装;
                 taskNo = "PS" + currentTime;
-                AgvAreaModel location = siteService.selectProductLocationByAreaCodeAndLineCode("PRODUCT_PACKAGING",
+                AgvAreaModel location = siteService.selectProductLocationByAreaCodeAndLineCode(deliveryTaskModel.getAreaCoding() + "_PRODUCT_PACKAGING",
                         deliveryTaskModel.getProductLine());
                 // 找到指定产线的库位区域
                 List<AgvAreaModel> agvAreaModels = siteService.selectAreasByParentId(location.getId(), 8);
@@ -300,13 +292,11 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                 if (deliveryTaskModel.getEndSiteId() > 0) {
                     // 站点未配送的叫料集合
                     List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(2, 1,
-                            null, null, deliveryTaskModel.getEndSiteId(), null, null);
+                            null, null, deliveryTaskModel.getEndSiteId(), deliveryTaskModel.getAreaCoding(), null, null);
                     MaterialBoxModel materialBoxModel = siteService
                             .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
-//                    Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-//                            deliveryTaskModel.getEndSiteId(), materialBoxModel.getId(), "包材-包装下发配送任务失败。", true, materialBoxMaterialModels);
                     Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-                            deliveryTaskModel.getEndSiteId(), 0, "包材-包装下发配送任务失败。", true, materialBoxMaterialModels);
+                            deliveryTaskModel.getEndSiteId(), "包材-包装配送失败。", true, materialBoxMaterialModels);
                     if (ObjectUtils.isEmpty(task)) {
                         return "发货失败";
                     }
@@ -354,16 +344,14 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
                     for (SiteModel siteModel : siteModels) {
                         // 站点未配送的叫料集合
                         List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialsByConditions(2, 1,
-                                null, null, siteModel.getId(), null, null);
+                                null, null, siteModel.getId(), deliveryTaskModel.getAreaCoding(), null, null);
                         if (CollectionUtils.isEmpty(callMaterialModels)) {
                             continue;
                         }
                         MaterialBoxModel materialBoxModel = siteService
                                 .selectMaterialBoxBySiteId(deliveryTaskModel.getStartSiteId());
-//                        Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-//                                siteModel.getId(), materialBoxModel.getId(), "包材-包装下发配送任务失败。", true, materialBoxMaterialModels);
                         Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo,
-                                siteModel.getId(), 0, "包材-包装下发配送任务失败。", true, materialBoxMaterialModels);
+                                siteModel.getId(), "包材-包装配送失败。", true, materialBoxMaterialModels);
                         if (ObjectUtils.isEmpty(task)) {
                             continue;
                         }
@@ -413,8 +401,8 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             case 6: { // 包装-包材;
                 taskNo = "TH" + currentTime;
                 // 查找包材-包装空闲库位
-                AgvArea agvArea = siteService.selectAgvAreaByCode("BC_EMPTY_LOCATION");
-                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, 0, "包装-包材下发退货任务失败。", false, null);
+                AgvArea agvArea = siteService.selectAgvAreaByCode(deliveryTaskModel.getAreaCoding() + "_BC_EMPTY_LOCATION");
+                Task task = executeSchedulerAddTask(deliveryTaskModel.getStartSiteId(), taskNo, agvArea, "退货失败。", false, null);
                 if (ObjectUtils.isEmpty(task)) {
                     return "发货失败";
                 }
@@ -432,7 +420,7 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
             }
             case 7: { // 拆包-消毒 改成直接通过波次配送
                 // 获取波次以及叫料区域类型，找出消毒间未配送的叫料
-                List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(deliveryTaskModel.getWaveCode(), 3, 1);
+                List<CallMaterialModel> callMaterialModels = callMaterialDao.selectCallMaterialByWaveCodeAndAreaType(deliveryTaskModel.getWaveCode(), 3, 1, deliveryTaskModel.getAreaCoding());
                 if (CollectionUtils.isEmpty(callMaterialModels)) {
                     Tracker.error("拆包-消毒配送失败。消毒间无叫料");
                     return "该波次已配送,无法发货";
@@ -469,22 +457,15 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
      * @param taskNo        任务单号
      * @param destinationId 目标点ID
      * @return 添加结果
-     * @throws Exception
+     * @throws Exception 异常
      */
-    private Task executeSchedulerAddTask(long startSiteId, String taskNo, long destinationId,
-                                         long materialBoxId, String errorMessage, boolean containerArrivedFlag, List<MaterialBoxMaterialModel> materialBoxMaterialModels) throws Exception {
+    private Task executeSchedulerAddTask(long startSiteId, String taskNo, long destinationId, String errorMessage, boolean containerArrivedFlag, List<MaterialBoxMaterialModel> materialBoxMaterialModels) throws Exception {
         Site source = siteService.get(startSiteId);
         source.setOrderNo(taskNo); // 设置任务单号
         Site destination = siteService.get(destinationId);
-        MaterialBoxModel materialBox = materialBoxDao.selectMaterialBoxById(materialBoxId);
-//        String materialBoxCode = null;
-//        if (!ObjectUtils.isEmpty(materialBox)) {
-//            materialBoxCode = materialBox.getCode();
-//        }
         // 如果需要则执行容器入场
         if (containerArrivedFlag) {
             scheduler.removeContainer(null, source.getCode());
-//            scheduler.removeContainer(materialBoxCode, null);
             // 目标点容器入场失败则无法执行下发任务
             if (!scheduler.addContainer(null, source.getCode())) {
                 Tracker.error("容器入场失败");
@@ -496,16 +477,10 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
         }
         List<Material> materials = new ArrayList<>();
         if (!CollectionUtils.isEmpty(materialBoxMaterialModels)) {
-            materialBoxMaterialModels.forEach(materialBoxMaterialModel -> {
-                materials.add(new Material(materialBoxMaterialModel.getMaterialUUID(), materialBoxMaterialModel.getCount()));
-            });
+            materialBoxMaterialModels.forEach(materialBoxMaterialModel -> materials.add(new Material(materialBoxMaterialModel.getMaterialUUID(), materialBoxMaterialModel.getCount())));
         }
         Task task = scheduler.addTask(source, destination, materials);
         if (ObjectUtils.isEmpty(task) || !StringUtils.isNullOrEmpty(task.getFailReason())) {
-            if (containerArrivedFlag) {
-                // 入场成功后出现错误，执行容器离场
-//                scheduler.removeContainer(materialBox.getCode(), source.getCode());
-            }
             Tracker.error(errorMessage);
             Task task1 = new Task();
             task1.setFailReason(ObjectUtils.isEmpty(task) ? errorMessage : task.getFailReason());
@@ -520,29 +495,21 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
      * @param startSiteId               起始站点ID
      * @param taskNo                    任务单号
      * @param destination               终点区域
-     * @param materialBoxId             料框ID
      * @param errorMessage              错误提示信息
      * @param containerArrivedFlag      是否需要执行容器入场
      * @param materialBoxMaterialModels 料车上的原料列表
      * @return 调度器任务对象
-     * @throws Exception
+     * @throws Exception 异常
      */
-    private Task executeSchedulerAddTask(long startSiteId, String taskNo, AgvArea destination,
-                                         long materialBoxId, String errorMessage, boolean containerArrivedFlag, List<MaterialBoxMaterialModel> materialBoxMaterialModels) throws Exception {
+    private Task executeSchedulerAddTask(long startSiteId, String taskNo, AgvArea destination, String errorMessage, boolean containerArrivedFlag, List<MaterialBoxMaterialModel> materialBoxMaterialModels) throws Exception {
         Site source = siteService.get(startSiteId);
         source.setOrderNo(taskNo); // 设置任务单号
-        MaterialBoxModel materialBox = materialBoxDao.selectMaterialBoxById(materialBoxId);
-        String materialBoxCode = null;
-//        if (!ObjectUtils.isEmpty(materialBox)) {
-//            materialBoxCode = materialBox.getCode();
-//        }
         // 如果需要则执行容器入场
         if (containerArrivedFlag) {
             scheduler.removeContainer(null, source.getCode());
-//            scheduler.removeContainer(materialBoxCode, null);
             // 目标点容器入场失败则无法执行下发任务
-            if (!scheduler.addContainer(materialBoxCode, source.getCode())) {
-                Tracker.error("容器入场失败");
+            if (!scheduler.addContainer(null, source.getCode())) {
+                Tracker.agv("executeSchedulerAddTask:容器入场失败");
                 Tracker.error(errorMessage);
                 Task task = new Task();
                 task.setFailReason("料车与库位绑定失败，请重试");
@@ -551,18 +518,12 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
         }
         List<Material> materials = new ArrayList<>();
         if (!CollectionUtils.isEmpty(materialBoxMaterialModels)) {
-            materialBoxMaterialModels.forEach(materialBoxMaterialModel -> {
-                materials.add(new Material(materialBoxMaterialModel.getMaterialUUID(), materialBoxMaterialModel.getCount()));
-            });
+            materialBoxMaterialModels.forEach(materialBoxMaterialModel -> materials.add(new Material(materialBoxMaterialModel.getMaterialUUID(), materialBoxMaterialModel.getCount())));
         }
         // 点到区域
         Task task = scheduler.addTask(source, destination, materials);
         if (ObjectUtils.isEmpty(task) || !StringUtils.isNullOrEmpty(task.getFailReason())) {
-            if (containerArrivedFlag) {
-                // 入场成功后出现错误，执行容器离场
-//                scheduler.removeContainer(materialBox.getCode(), source.getCode());
-            }
-            Tracker.error(errorMessage);
+            Tracker.agv(String.format("%s:%s",errorMessage, null != destination ? destination.toString():""));
             Task task1 = new Task();
             task1.setFailReason(ObjectUtils.isEmpty(task) ? errorMessage : task.getFailReason());
             return task1;
@@ -627,7 +588,6 @@ public class DeliveryTaskService extends BaseService<DeliveryTaskDao, DeliveryTa
      *
      * @param id    任务ID
      * @param state 任务状态
-     * @return 是否成功
      */
     public void updateStateById(long id, int state) {
         deliveryTaskDao.updateStateById(id, state);

@@ -33,7 +33,7 @@ class FrogTests {
         List<GetMoResponseMsg.DataEntity> moEntities = new ArrayList<>();
         if (!CollectionUtils.isEmpty(getMoResponseMsg.getErp_mm_mo_get_response().getData())) {
             getMoResponseMsg.getErp_mm_mo_get_response().getData().forEach(moEntity -> {
-                if ((!StringUtils.isNullOrEmpty(moEntity.getProductlinename())) && (moEntity.getProductlinename().indexOf("3B") >= 0)) {
+                if ((!StringUtils.isNullOrEmpty(moEntity.getProductlinename())) && (moEntity.getProductlinename().indexOf("3B") >= 0 || moEntity.getProductlinename().indexOf("3C") >= 0)) {
                     moEntities.add(moEntity);
                 }
             });
@@ -52,7 +52,7 @@ class FrogTests {
     @Test
     public void GetFullInfoList() {
         GetMoResponseMsg getMoResponseMsg = productionPlanScheduler.getMo(ProductionPlanScheduler.DayType.today);
-        GetBillFullInfoResponseMsg getBillFullInfo = productionPlanScheduler.getBillFullInfo(getMoResponseMsg.getErp_mm_mo_get_response().getData());
+        GetBillFullInfoResponseMsg getBillFullInfo = productionPlanScheduler.getBillsFullInfo(getMoResponseMsg.getErp_mm_mo_get_response().getData());
         System.out.println(getBillFullInfo.toString());
     }
 
@@ -74,7 +74,7 @@ class FrogTests {
     public void addDeliveryTaskTest() {
         DeliveryTaskModel deliveryTaskModel = new DeliveryTaskModel();
         deliveryTaskModel.setType(5);
-        deliveryTaskModel.setProductLine("L12");
+        deliveryTaskModel.setProductLine("3B12");
         deliveryTaskModel.setStartSiteId(37);
         try {
             deliveryTaskService.addDeliveryTask(deliveryTaskModel);
