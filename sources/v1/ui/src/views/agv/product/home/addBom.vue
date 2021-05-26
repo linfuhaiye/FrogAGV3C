@@ -15,11 +15,6 @@
           <el-input v-model="scope.row.num"></el-input>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="已验收" width="200">
-        <template slot-scope="scope">
-          <el-input v-model="scope.row.done"></el-input>
-        </template>
-      </el-table-column>-->
     </el-table>
 
     <div slot="footer" class="dialog-footer" align="center">

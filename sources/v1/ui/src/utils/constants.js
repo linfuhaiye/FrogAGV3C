@@ -74,5 +74,13 @@ export default {
   materialBoxState: [
     { value: 0, label: '空车' },
     { value: 1, label: '有货' }
+  ],
+  agvTaskState: [
+    { value: 'Initialized', label: '初始化' },
+    { value: 'Moving', label: '搬运中' },
+    { value: 'Paused', label: '暂停中' },
+    { value: 'Arrived', label: '到达' },
+    { value: 'Cancelled', label: '取消' },
+    { value: 'Fail', label: '失败' }
   ]
 };

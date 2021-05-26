@@ -52,6 +52,7 @@ import request from '@/utils/request';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
+const areaCoding = process.env.AREA_CODING;
 export default {
   name: 'editBom',
   data() {
@@ -59,6 +60,10 @@ export default {
       info: {},
       // 加载对象
       load: null,
+      selectSearchParams: {
+        code: 'PRODUCT_FILLING',
+        areaCoding: areaCoding
+      },
       datas: [],
       lines: []
     };
@@ -90,7 +95,8 @@ export default {
         method: 'PUT',
         params: {
           productOrderNo: this.info.productionOrderNo,
-          lineCode: this.info.line
+          lineCode: this.info.line,
+          areaCoding: areaCoding
         }
       })
         .then(response => {
@@ -117,9 +123,7 @@ export default {
       request({
         url: '/agv/agvAreas/selectProductLines',
         method: 'GET',
-        params: {
-          code: 'PRODUCT_FILLING'
-        }
+        params: this.selectSearchParams
       })
         .then(response => {
           // 如果遮罩层存在

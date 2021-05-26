@@ -15,15 +15,15 @@
           v-if="auth==='admin'"
           class="menu-item current-menu flex-box flex-justify-content-center flex-align-items-center"
         >生产设置</div>
-        <!-- <div
+        <div
+          v-if="auth==='admin'"
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/agv/call/history')"
-        >叫料历史</div>-->
+          @click="turn('/agv/task')"
+        >任务管理</div>
       </div>
       <!-- 右边内容 -->
       <div
-        class="flex-box flex-direction-column"
-        style="width:100%;margin-left:10px;margin-right:20px;"
+        class="flex-box flex-direction-column right-content"
       >
         <!-- 按钮 -->
         <div class="flex-box content-button setting-button-div flex-align-items-center">
@@ -39,10 +39,6 @@
             class="btn btn-default btn-add flex-box flex-justify-content-center flex-align-items-center"
             @click="addPlan()"
           >新增生产计划</div>
-          <!-- <div
-            class="btn btn-default btn-update flex-box flex-justify-content-center flex-align-items-center"
-            @click="split()"
-          >拆分波次</div>-->
           <div
             class="btn btn-default btn-update flex-box flex-justify-content-center flex-align-items-center"
             @click="updatePlans()"
@@ -93,143 +89,167 @@
     >
       <BackBom :bomItem="settingBom" @toggleShow="toggleShow" @reloadData="getBoms"></BackBom>
     </el-dialog>
-    <el-dialog :visible.sync="state.saveBomVisible" title="新增计划" class="dialog-transfer">
+    <el-dialog
+      v-if="state.addPlanVisible"
+      :visible.sync="state.addPlanVisible"
+      title="新增计划"
+      class="dialog-transfer"
+      :width="'80%'"
+    >
       <SaveBom @toggleShow="toggleShow"></SaveBom>
     </el-dialog>
   </div>
 </template>
 
+<style scoped>
+.content-button .btn {
+    width: 16vmin;
+}
+</style>
 <script>
-  import draggable from 'vuedraggable';
-  import '../home/home.scss';
-  import BackBom from './backBom';
-  import SaveBom from './saveBom';
-  import request from '@/utils/request';
-  // import Constants from '@/utils/constants';
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import draggable from 'vuedraggable';
+import '../home/home.scss';
+import BackBom from './backBom';
+import SaveBom from './saveBom';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  const areaTypeString = process.env.AREA_TYPE;
-  export default {
-    name: 'home',
-    components: { draggable, BackBom, SaveBom },
-    created() {
-      this.loadingInfo();
+const areaTypeString = process.env.AREA_TYPE;
+export default {
+  name: 'home',
+  components: { draggable, BackBom, SaveBom },
+  created() {
+    this.loadingInfo();
+  },
+  data() {
+    return {
+      state: {
+        settingBomVisible: false,
+        addPlanVisible: false
+      },
+      // 加载对象
+      load: null,
+      waveState: 0,
+      settingBom: null,
+      updateState: 0,
+      boms: [],
+      areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
+      auth: 'user',
+      // 正在获取数据标志
+      gettingFlag: false
+    };
+  },
+  destroyed() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  },
+  methods: {
+    loadingInfo() {
+      this.auth = this.$store.state.AgvHeader.auth;
+      this.formateAreaType();
+      this.timer();
     },
-    data() {
-      return {
-        state: {
-          settingBomVisible: false,
-          saveBomVisible: false
-        },
-        // 加载对象
-        load: null,
-        waveState: 0,
-        settingBom: null,
-        updateState: 0,
-        boms: [],
-        areaType: 1, // 区域类型,默认灌装区 1:灌装区;2:包装区
-        auth: 'user'
-      };
+    formateAreaType() {
+      if (areaTypeString === 'filling') {
+        this.areaType = 1;
+        this.$store.dispatch('updateTitle', '灌装区生产设置');
+      } else if (areaTypeString === 'packing') {
+        this.areaType = 2;
+        this.$store.dispatch('updateTitle', '包装区生产设置');
+      }
     },
-    methods: {
-      loadingInfo() {
-        this.auth = this.$store.state.AgvHeader.auth;
-        this.formateAreaType();
-        this.timer();
-      },
-      formateAreaType() {
-        if (areaTypeString === 'filling') {
-          this.areaType = 1;
-          this.$store.dispatch('updateTitle', '灌装区波次管理');
-        } else if (areaTypeString === 'packing') {
-          this.areaType = 2;
-          this.$store.dispatch('updateTitle', '包装区波次管理');
+    timer() {
+      this.getBoms();
+      if (this.timer) {
+        clearInterval(this.timer);
+      }
+      this.timer = setInterval(() => {
+        if (this.gettingFlag) {
+          return;
         }
-      },
-      timer() {
+        this.gettingFlag = true;
         this.getBoms();
-        if (this.timer) {
-          clearInterval(this.timer);
-        }
-        this.timer = setInterval(() => {
-          this.getBoms();
-        }, 5000);
-      },
-      unSetting() {
-        this.updateState = 0;
-        this.getBoms();
-      },
-      seted() {
-        this.updateState = 1;
-        this.getBoms();
-      },
-      addPlan() {
-        console.log('**添加计划**');
-      },
-      updatePlans() {
-        this.load = this.showErrorMessage('计划更新中,请稍后...');
-        request({
-          url: '/agv/getData/updatePlans',
-          method: 'GET'
-        })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              this.getBoms();
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败,请重试...');
-          });
-      },
-      getBoms() {
-        request({
-          url: '/agv/bom/getBoms',
-          method: 'GET',
-          params: {
-            updateState: this.updateState
+      }, 5000);
+    },
+    unSetting() {
+      this.updateState = 0;
+      this.getBoms();
+    },
+    seted() {
+      this.updateState = 1;
+      this.getBoms();
+    },
+    updatePlans() {
+      this.load = this.showErrorMessage('计划更新中,请稍后...');
+      request({
+        url: '/agv/getData/updatePlans',
+        method: 'GET'
+      })
+        .then((response) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.getBoms();
           }
         })
-          .then(response => {
-            if (response.errno === 0) {
-              this.boms = response.data;
-            }
-          })
-          .catch(_ => {
-          });
-      },
-      // 跳转到指定页面
-      turn(url) {
-        this.$router.push({ path: url });
-      },
-      // 配置BOM信息
-      setting(bom) {
-        this.settingBom = bom;
-        this.state.settingBomVisible = true;
-      },
-      toggleShow() {
-        this.state.settingBomVisible = false;
-        this.state.saveBomVisible = false;
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
-      }
+        .catch((_) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败,请重试...');
+        });
+    },
+    getBoms() {
+      request({
+        url: '/agv/bom/getBoms',
+        method: 'GET',
+        params: {
+          updateState: this.updateState
+        }
+      })
+        .then((response) => {
+          this.gettingFlag = false;
+          if (response.errno === 0) {
+            this.boms = response.data;
+          }
+        })
+        .catch(() => {
+          this.gettingFlag = false;
+        });
+    },
+    // 跳转到指定页面
+    turn(url) {
+      this.$router.push({ path: url });
+    },
+    // 配置BOM信息
+    setting(bom) {
+      this.settingBom = bom;
+      this.state.settingBomVisible = true;
+    },
+    addPlan() {
+      this.state.addPlanVisible = true;
+    },
+    toggleShow() {
+      this.state.settingBomVisible = false;
+      this.state.addPlanVisible = false;
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>

@@ -28,6 +28,7 @@
           <div class="bom-detail-title-name">原料名称</div>
           <div class="bom-detail-title-num">数量</div>
           <div class="bom-detail-title-type">类型</div>
+          <div class="bom-detail-title-full">满车数量</div>
         </div>
         <!-- 表体 -->
         <div class="data-wave">
@@ -48,6 +49,9 @@
                 <input type="radio" value="3" v-model="bomDetail.type" />
                 <span>其 它</span>
               </div>
+              <div class="bom-detail-data-full">
+                <el-input type="number" v-model="bomDetail.fullCount" />
+              </div>
             </div>
           </div>
         </div>
@@ -66,140 +70,106 @@
 </template>
 
 <script>
-  import request from '@/utils/request';
-  // import Constants from '@/utils/constants';
-  import { isEmpty } from '@/utils/helper';
-  import { Loading } from 'element-ui';
+import './setting.scss';
+import request from '@/utils/request';
+// import Constants from '@/utils/constants';
+import { isEmpty } from '@/utils/helper';
+import { Loading } from 'element-ui';
 
-  export default {
-    name: 'backBom',
-    data() {
-      return {
-        info: {},
-        bomDetails: [],
-        // 加载对象
-        load: null
-      };
+export default {
+  name: 'backBom',
+  data() {
+    return {
+      info: {},
+      bomDetails: [],
+      // 加载对象
+      load: null
+    };
+  },
+  created() {
+    this.loadingInfo();
+  },
+  props: {
+    bomItem: Object
+  },
+  methods: {
+    loadingInfo() {
+      this.info = this.bomItem;
+      this.getBomDetail();
     },
-    created() {
-      this.loadingInfo();
-    },
-    props: {
-      bomItem: Object
-    },
-    methods: {
-      loadingInfo() {
-        this.info = this.bomItem;
-        this.getBomDetail();
-      },
-      getBomDetail() {
-        this.load = this.showErrorMessage('正在获取BOM清单,请稍后');
-        request({
-          url: '/agv/bom/getBomDetails',
-          method: 'GET',
-          params: {
-            bomId: this.bomItem.id
+    getBomDetail() {
+      this.load = this.showErrorMessage('正在获取BOM清单,请稍后');
+      request({
+        url: '/agv/bom/getBomDetails',
+        method: 'GET',
+        params: {
+          bomId: this.bomItem.id
+        }
+      })
+        .then((response) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            this.bomDetails = response.data;
           }
         })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
+        .catch((_) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败,请重试...');
+        });
+    },
+    // 弹出框标志变化
+    toggleShow() {
+      this.$emit('toggleShow');
+    },
+    // 修改信息
+    updateData() {
+      const sendItem = this.info;
+      sendItem.bomDetails = this.bomDetails;
+      this.load = this.showErrorMessage('正在更新BOM,请稍后');
+      request({
+        url: '/agv/bom/updateBom',
+        method: 'POST',
+        data: sendItem
+      })
+        .then((response) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          if (response.errno === 0) {
+            if (response.data) {
+              this.$emit('reloadData');
+              this.$emit('toggleShow');
+            } else {
+              this.$message.error('更新失败,请重试...');
             }
-            if (response.errno === 0) {
-              this.bomDetails = response.data;
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败,请重试...');
-          });
-      },
-      // 弹出框标志变化
-      toggleShow() {
-        this.$emit('toggleShow');
-      },
-      // 修改信息
-      updateData() {
-        const sendItem = this.info;
-        sendItem.bomDetails = this.bomDetails;
-        this.load = this.showErrorMessage('正在更新BOM,请稍后');
-        request({
-          url: '/agv/bom/updateBom',
-          method: 'POST',
-          data: sendItem
+          }
         })
-          .then(response => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            if (response.errno === 0) {
-              if (response.data) {
-                this.$emit('reloadData');
-                this.$emit('toggleShow');
-              } else {
-                this.$message.error('更新失败,请重试...');
-              }
-            }
-          })
-          .catch(_ => {
-            // 如果遮罩层存在
-            if (!isEmpty(this.load)) {
-              this.load.close();
-            }
-            this.$message.error('服务器请求失败,请重试...');
-          });
-      },
-      // 用遮罩层显示错误信息
-      showErrorMessage(message) {
-        const options = {
-          lock: true,
-          fullscreen: true,
-          text: message,
-          spinner: '',
-          background: 'rgba(0, 0, 0, 0.7)'
-        };
-        return Loading.service(options);
-      }
+        .catch((_) => {
+          // 如果遮罩层存在
+          if (!isEmpty(this.load)) {
+            this.load.close();
+          }
+          this.$message.error('服务器请求失败,请重试...');
+        });
+    },
+    // 用遮罩层显示错误信息
+    showErrorMessage(message) {
+      const options = {
+        lock: true,
+        fullscreen: true,
+        text: message,
+        spinner: '',
+        background: 'rgba(0, 0, 0, 0.7)'
+      };
+      return Loading.service(options);
     }
-  };
+  }
+};
 </script>
-<style>
-.item-title {
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.item-content {
-  font-size: 18px;
-  font-weight: 500;
-}
-.bom-detail-title-name {
-  font-size: 20px;
-  width: 50%;
-}
-.bom-detail-title-num {
-  font-size: 20px;
-  width: 10%;
-}
-.bom-detail-title-type {
-  font-size: 20px;
-  width: 35%;
-}
-.bom-detail-data-name {
-  font-size: 16px;
-  width: 50%;
-}
-.bom-detail-data-num {
-  font-size: 16px;
-  width: 10%;
-}
-.bom-detail-data-type {
-  font-size: 16px;
-  width: 30%;
-}
-</style>

@@ -15,16 +15,14 @@
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
           @click="turn('/agv/setting')"
         >生产设置</div>
-        <!-- <div
+        <div
+          v-if="auth==='admin'"
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/agv/call/history')"
-        >叫料历史</div>-->
+          @click="turn('/agv/task')"
+        >任务管理</div>
       </div>
       <!-- 右边内容 -->
-      <div
-        class="flex-box flex-direction-column"
-        style="width:100%;margin-left:10px;margin-right:20px;"
-      >
+      <div class="flex-box flex-direction-column right-content">
         <!-- 按钮 -->
         <div class="flex-box content-button flex-align-items-center">
           <div
@@ -35,36 +33,28 @@
             class="btn btn-default btn-click flex-box flex-justify-content-center flex-align-items-center"
             @click="showUnFinish()"
           >未完成</div>
-          <div class="flex-box flex-direction-row">
-            <div>
-              <span style="color:black;margin-left: 32px;font-size: 23px;">生产线：</span>
-            <SelectIndex class="el-select" v-model="searchParams.productLine" 
+          <div style="width:41vmin;" class="flex-box flex-direction-row flex-justify-content-center flex-align-items-center">
+            <p class="search-title">生产日期：</p>
+            <el-date-picker
+              v-model="searchParams.executionTime"
+              type="date"
+              placeholder="选择日期"
+              style="width: 100%;"
+              :value-format="'yyyy-MM-dd'"
+            ></el-date-picker>
+          </div>
+          <div style="width:41vmin;" class="flex-box flex-direction-row flex-justify-content-center flex-align-items-center">
+            <span class="search-title">生产线：</span>
+            <SelectIndex v-model="searchParams.productLine" 
+              style="width: 100%;"
               :url="'/agv/agvAreas/selectProductLines'" 
               :isQueryCriteria="true" 
               :defaultFirst="true" 
               :valueIsCode="true" 
               :valueIsNumber="false" 
-              :searchParams="{code: 'PRODUCT_FILLING'}">
+              :searchParams="selectSearchParams">
             </SelectIndex>
-            </div>
-            <div>
-              <p
-                style="color:black;width: 115px;font-size: 23px;margin-bottom: -55px;margin-left: 14px;margin-top: 17px;"
-              >生产日期：</p>
-              <el-date-picker
-                class="el-input"
-                v-model="searchParams.executionTime"
-                type="date"
-                placeholder="选择日期"
-                style="width: 100%;"
-                :value-format="'yyyy-MM-dd'"
-              ></el-date-picker>
-            </div>
           </div>
-          <!-- <div
-            class="btn btn-default btn-add flex-box flex-justify-content-center flex-align-items-center"
-            @click="addWave()"
-          >新增</div>-->
         </div>
         <!-- 表头内容 -->
         <div class="flex-box data-header-content flex-align-items-center" style="width:100%;">
@@ -165,10 +155,6 @@
   position: relative;
   margin-top: 12px;
 }
-.el-input {
-  margin-top: 24px;
-  margin-left: 130px;
-}
 </style>
 
 <script>
@@ -183,6 +169,7 @@ import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
 const areaTypeString = process.env.AREA_TYPE;
+const areaCoding = process.env.AREA_CODING;
 // 配送管理
 export default {
   name: 'home',
@@ -208,8 +195,19 @@ export default {
       auth: 'user',
       changeLineProduct: null,
       changeLinePositionName: '',
-      searchParams: {}
+      searchParams: {},
+      selectSearchParams: {
+        code: 'PRODUCT_FILLING',
+        areaCoding: areaCoding
+      },
+      // 正在获取数据标志
+      gettingFlag: false
     };
+  },
+  destroyed() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
   },
   methods: {
     loadingInfo() {
@@ -233,6 +231,10 @@ export default {
         clearInterval(this.timer);
       }
       this.timer = setInterval(() => {
+        if (this.gettingFlag) {
+          return;
+        }
+        this.gettingFlag = true;
         this.getWaves();
       }, 5000);
     },
@@ -381,15 +383,18 @@ export default {
           type: this.areaType,
           teamId: this.teamId,
           state: this.waveState,
+          areaCoding: areaCoding,
           ...this.searchParams
         }
       })
         .then(response => {
+          this.gettingFlag = false;
           if (response.errno === 0) {
             this.waves = response.data;
           }
         })
-        .catch(_ => {
+        .catch(() => {
+          this.gettingFlag = false;
         });
     },
     // 格式化状态

@@ -1,11 +1,11 @@
 .left-menu {
-  width: 200px;
+  width: 15%;
   color: #ffffff;
   font-size: 25px;
   text-align: center;
   background-color: #f4e9e9;
-  margin-left: 20px;
-  margin-bottom: 10px;
+  margin-left: 1%;
+  height: 98%;
   .menu-item {
     height: 60px;
     background-color: #e8d0d0;
@@ -31,19 +31,26 @@
   }
 }
 
+.right-content {
+  width:82%;
+  height: 98%;
+  margin-left:1%;
+  margin-right:1%;
+}
+
 .content-button {
   color: #ffffff;
   background-color: #f4e9e9;
   height: 60px;
   .btn {
-    width: 150px;
-    height: 40px;
+    width: 12vmin;
+    height: 5vmin;
   }
   .btn-default {
     text-align: center;
-    font-size: 24px;
+    font-size: 2.5vmin;
     background-color: #558ed5;
-    margin-left: 50px;
+    margin-left: 1%;
     border-radius: 10px;
   }
   .btn-click {
@@ -59,7 +66,7 @@
 
 .setting-button-div {
   .btn-default {
-    margin-left: 10px;
+    margin-left: 1%;
   }
   
   .bom-sort {
@@ -96,10 +103,22 @@
   .data-header-operation {
     text-align: center;
   }
+  .data-header-source {
+    width: 20%;
+    text-align: center;
+  }
+  .data-header-destination {
+    width: 20%;
+    text-align: center;
+  }
+  .data-header-status {
+    width: 20%;
+    text-align: center;
+  }
 }
 
 .data-content {
-  height: calc(100vh - 190px);
+  height: calc(100vh - 170px);
   overflow-y: auto;
   background-color: #f4e9e9;
   .data-content-row,
@@ -150,6 +169,18 @@
   }
   .bom-done {
     width: 120px;
+    text-align: center;
+  }
+  .content-source {
+    width: 20%;
+    text-align: center;
+  }
+  .content-destination {
+    width: 20%;
+    text-align: center;
+  }
+  .content-status {
+    width: 20%;
     text-align: center;
   }
   .bom-add-icon {
@@ -260,4 +291,14 @@
 
 .disabledClick {
   pointer-events: none;
+}
+
+.search-title {
+  color:black;
+  width: 21vmin;
+  font-size: 2.5vmin;
+  text-align: right;
+}
+.el-input {
+  margin: 0px;
 }

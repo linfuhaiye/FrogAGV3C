@@ -6,24 +6,17 @@
         <div
           class="menu-item current-menu flex-box flex-justify-content-center flex-align-items-center"
         >配货任务</div>
-        <div
+        <div v-if="areaCoding === '3B'"
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
           @click="turn('/demolition/call')"
         >叫料</div>
-        <!-- <div
-          class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/demolition/call/history')"
-        >叫料历史</div>-->
       </div>
       <!-- 右边内容 -->
-      <div
-        class="flex-box flex-direction-column"
-        style="width:100%;margin-left:10px;margin-right:20px;"
-      >
+      <div class="flex-box flex-direction-column right-content">
         <!-- 配送任务 -->
-        <div class="flex-box flex-direction-column task-list-box">
+        <div class="flex-box flex-direction-column task-list-box" :class="areaCoding === '3B'?'':'task-list-box-all'">
           <div class="task-list-title">配送任务</div>
-          <div class="data-content">
+          <div class="data-content" :class="areaCoding === '3B'?'task-data-content':'task-data-content-all'">
             <div v-for="(item) in tasks" :key="item.id">
               <div class="flex-box flex-direction-row data-content-produce-row">
                 <div
@@ -50,8 +43,7 @@
           </div>
         </div>
         <!-- 库位区 -->
-        <div class="task-content fillParent">
-          <!-- <div class="title">库位区</div> -->
+        <div v-if="areaCoding === '3B'" class="task-content fillParent">
           <div class="position-box flex-box flex-wrap">
             <div v-for="(item) in sites" :key="item.id">
               <div @click="turnBack(item)" class="pointer site-item">
@@ -70,6 +62,21 @@
   </div>
 </template>
 
+<style scoped>
+.task-list-box-all {
+    width: 100%;
+    height: 100%;
+    background-color: #d99694;
+}
+.task-data-content {
+  height: calc(100vh - 170px);
+  background-color: #f4e9e9;
+}
+.task-data-content-all {
+  height: calc(100vh - 90px);
+}
+</style>
+
 <script>
 import '../../product/home/home.scss';
 import './task.scss';
@@ -77,6 +84,7 @@ import request from '@/utils/request';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
+const areaCoding = process.env.AREA_CODING;
 export default {
   name: 'home',
   components: {},
@@ -87,8 +95,15 @@ export default {
     return {
       // 加载对象
       load: null,
+      searchParams: {
+        areaCoding: areaCoding,
+        type: 3,
+        state: 1
+      },
       sites: [],
-      tasks: []
+      tasks: [],
+      // 正在获取数据标志
+      gettingFlag: false
     };
   },
   watch: {
@@ -110,6 +125,11 @@ export default {
       }
     }
   },
+  destroyed() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  },
   methods: {
     loadingInfo() {
       this.$store.dispatch('updateTitle', '拆包间配货任务');
@@ -127,6 +147,10 @@ export default {
         clearInterval(this.timer);
       }
       this.timer = setInterval(() => {
+        if (this.gettingFlag) {
+          return;
+        }
+        this.gettingFlag = true;
         this.getSites();
         this.getDistributionTasks();
       }, 5000);
@@ -140,29 +164,33 @@ export default {
         }
       })
         .then(response => {
+          this.gettingFlag = false;
           if (response.errno === 0) {
             this.sites = response.data;
           }
         })
-        .catch(_ => {});
+        .catch(() => {
+          this.gettingFlag = false;
+        });
     },
     getDistributionTasks() {
       request({
         url: '/agv/callMaterials/distributionTasks',
         method: 'GET',
-        params: {
-          type: 3,
-          state: 1
-        }
+        params: this.searchParams
       })
         .then(response => {
+          this.gettingFlag = false;
           this.tasks = response.data;
         })
-        .catch(_ => {});
+        .catch(() => {
+          this.gettingFlag = false;
+        });
     },
     // 发货
     deliverGoods(wave) {
       const sendItem = {
+        areaCoding: areaCoding,
         waveCode: wave.waveCode,
         type: 7
       };
@@ -193,6 +221,7 @@ export default {
     // 退回
     turnBack(bom) {
       const sendItem = {
+        areaCoding: areaCoding,
         startSiteId: bom.id,
         materialBoxId: 0,
         type: 4

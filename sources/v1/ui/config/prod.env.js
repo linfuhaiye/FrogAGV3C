@@ -8,6 +8,8 @@ module.exports = {
   MQTT_SERVICE: '"ws://112.51.3.158:8083/mqtt"',
   MQTT_USERNAME: '"admin"',
   MQTT_PASSWORD: '"public"',
+  // AREA_CODING: '"3B"',
+  AREA_CODING: '"3C"',
   AREA_TYPE: '"demolition"'
   // AREA_TYPE: '"disinfection"'
   // AREA_TYPE: '"materials"'

@@ -10,67 +10,53 @@
           class="menu-item flex-box flex-justify-content-center flex-align-items-center"
           @click="turn('/disinfection/call')"
         >叫料</div>
-        <!-- <div
-          class="menu-item flex-box flex-justify-content-center flex-align-items-center"
-          @click="turn('/disinfection/call/history')"
-        >叫料历史</div>-->
       </div>
       <!-- 右边内容 -->
-      <div
-        class="flex-box"
-        style="width:100%;margin-left:10px;margin-right:20px; margin-bottom:10px;"
-      >
+      <div class="flex-box flex-direction-column right-content">
         <!-- 配送任务 -->
         <div class="task-list-box flex-box flex-direction-column">
           <div class="task-list-title">配送任务</div>
-          <div style="margin-left: -25px;width: 51%;margin-bottom: -36px;">
-            <span style="color:blacks;margin-left: 32px;font-size: 16px;">生产线：</span>
-            <SelectIndex
-              class="el-select"
-              v-model="searchParams.productLine"
-              :url="'/agv/agvAreas/selectProductLines'"
-              :isQueryCriteria="true"
-              :defaultFirst="true"
-              :valueIsCode="true"
-              :valueIsNumber="false"
-              :searchParams="{code: 'PRODUCT_FILLING'}"
-            ></SelectIndex>
-          </div>
-          <div style="width: 71%;    margin-left: 182px">
-            <span style="color:black;font-size: 16px;">日期：</span>
-            <el-date-picker
+          <!-- 查询框 -->
+          <div class="flex-box setting-button-div flex-align-items-center">
+            <div style="width:41vmin;" class="flex-box flex-direction-row flex-justify-content-center flex-align-items-center">
+              <p class="search-title">生产日期：</p>
+              <el-date-picker
               class="el-input"
               v-model="searchParams.executionTime"
               type="date"
               placeholder="选择日期"
-              style="width: 50%;"
+              style="width: 100%;"
               :value-format="'yyyy-MM-dd'"
-            ></el-date-picker>
+              ></el-date-picker>
+            </div>
+            <div style="width:41vmin;" class="flex-box flex-direction-row flex-justify-content-center flex-align-items-center">
+              <span class="search-title">生产线：</span>
+              <SelectIndex
+                style="width: 100%;"
+                v-model="searchParams.productLine"
+                :url="'/agv/agvAreas/selectProductLines'"
+                :isQueryCriteria="true"
+                :defaultFirst="true"
+                :valueIsCode="true"
+                :valueIsNumber="false"
+                :searchParams="selectSearchParams"
+              ></SelectIndex>
+            </div>
           </div>
-          <div style="overflow:auto; overflow-x:visible;">
+          <!-- 列表 -->
+          <div class="task-data-content" style="overflow:auto; overflow-x:visible; min-height:11.5%;">
             <div v-for="(item) in tasks" :key="item.id">
-              <div class="task-list-name">{{item.productName+" （"+item.productLineCode+"） "}}</div>
-              <!-- buttom click 方法  el-button -->
-              <el-button @click="run(item)" style="margin-left: 283px;" round>圆角按钮</el-button>
+              <div class="flex-box flex-direction-row flex-align-items-center">
+                <div class="task-list-name">{{item.productName+" （"+item.productLineCode+"） "}}</div>
+                <!-- buttom click 方法  el-button -->
+                <el-button @click="run(item)" round>前往叫料</el-button>
+              </div>
               <div v-for="(bom) in item.callMaterialModels" :key="bom.id" style=" margin-top:5px;">
                 <div
                   class="task-list-bom-name"
                   style="display:inline-block; width:65%;"
                 >{{bom.materialName}}</div>
                 <div class="task-list-bom-num" style="display:inline-block;">{{bom.count}}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- 备货区 -->
-        <div class="task-content">
-          <div class="title">备货区</div>
-          <div class="position-box flex-box flex-wrap">
-            <div v-for="(item) in sites" :key="item.id">
-              <div @click="taskOut(item)" class="pointer site-item">
-                <div class="position position-pointer" v-if="item.materialBoxId">{{item.bomName}}</div>
-                <div class="position" v-else></div>
-                <div class="site-item-name">{{item.name}}</div>
               </div>
             </div>
           </div>
@@ -107,6 +93,9 @@
 .el-input {
   transition: all 0.3s;
 }
+.flex-direction-row {
+  background-color: unset;
+}
 </style>
 
 <script>
@@ -118,6 +107,7 @@ import SelectIndex from '@/components/Select/index';
 import { isEmpty } from '@/utils/helper';
 import { Loading } from 'element-ui';
 
+const areaCoding = process.env.AREA_CODING;
 export default {
   name: 'home',
   components: { TaskOut, SelectIndex },
@@ -131,15 +121,20 @@ export default {
       },
       // 加载对象
       load: null,
+      selectSearchParams: {
+        code: 'PRODUCT_FILLING',
+        areaCoding: areaCoding
+      },
       searchParams: {
+        areaCoding: areaCoding,
         type: 1,
         state: 1
       },
-      sites: [],
       tasks: [],
       taskOutPositionName: '',
       taskOutBom: null,
-      msk: 10
+      // 正在获取数据标志
+      gettingFlag: false
     };
   },
   watch: {
@@ -161,6 +156,11 @@ export default {
       }
     }
   },
+  destroyed() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  },
   methods: {
     loadingInfo() {
       this.$store.dispatch('updateTitle', '消毒间配货任务');
@@ -179,13 +179,15 @@ export default {
       this.state.taskOutVisible = false;
     },
     timer() {
-      this.getSites();
       this.getDistributionTasks();
       if (this.timer) {
         clearInterval(this.timer);
       }
       this.timer = setInterval(() => {
-        this.getSites();
+        if (this.gettingFlag) {
+          return;
+        }
+        this.gettingFlag = true;
         this.getDistributionTasks();
       }, 5000);
     },
@@ -194,21 +196,6 @@ export default {
       this.taskOutPositionName = bom.name;
       this.state.taskOutVisible = true;
     },
-    getSites() {
-      request({
-        url: '/agv/sites',
-        method: 'GET',
-        params: {
-          type: 4
-        }
-      })
-        .then(response => {
-          if (response.errno === 0) {
-            this.sites = response.data;
-          }
-        })
-        .catch(_ => {});
-    },
     getDistributionTasks() {
       request({
         url: '/agv/callMaterials/distributionTasks',
@@ -216,9 +203,12 @@ export default {
         params: this.searchParams
       })
         .then(response => {
+          this.gettingFlag = false;
           this.tasks = response.data;
         })
-        .catch(_ => {});
+        .catch(() => {
+          this.gettingFlag = false;
+        });
     },
     // 用遮罩层显示错误信息
     showErrorMessage(message) {

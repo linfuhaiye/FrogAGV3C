@@ -82,6 +82,7 @@
   import { isEmpty } from '@/utils/helper';
   import { Loading } from 'element-ui';
 
+  const areaCoding = process.env.AREA_CODING;
   export default {
     name: 'editBom',
     data() {
@@ -121,6 +122,7 @@
           return;
         }
         const sendItem = {
+          areaCoding: areaCoding,
           startSiteId: info.id,
           materialBoxId: info.materialBoxId,
           type: 7
@@ -167,6 +169,7 @@
           return;
         }
         const sendItem = {
+          areaCoding: areaCoding,
           startSiteId: info.id,
           materialBoxId: info.materialBoxId,
           type: 4

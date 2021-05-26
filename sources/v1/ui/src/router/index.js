@@ -38,6 +38,12 @@ export const constantRouterMap = [
         meta: { title: 'agvSetting', icon: 'agvSetting', noCache: true }
       },
       {
+        path: 'task',
+        component: () => import('@/views/agv/product/task/index'),
+        name: 'agvTask',
+        meta: { title: 'agvTask', icon: 'agvTask', noCache: true }
+      },
+      {
         path: 'wave',
         component: () => import('@/views/agv/product/wave/index'),
         name: 'agvWave',

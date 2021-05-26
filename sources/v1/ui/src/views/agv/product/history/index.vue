@@ -48,6 +48,7 @@ import ComplexTable from '@/components/ComplexTable';
 import '../../product/home/home.scss';
 import '../../table.scss';
 
+const areaCoding = process.env.AREA_CODING;
 export default {
   name: 'call',
   components: { ComplexTable },
@@ -58,6 +59,7 @@ export default {
     return {
       callState: 0,
       fetchParams: {
+        areaCoding: areaCoding,
         type: 1,
         teamId: 'uuidxxxxb03',
         state: this.callState
@@ -82,12 +84,6 @@ export default {
           width: '15%',
           sortable: 'false'
         },
-        // {
-        //   text: 'agv.bom.done',
-        //   value: 'done',
-        //   width: '20%',
-        //   sortable: 'false'
-        // },
         {
           text: 'agv.bom.status',
           value: 'status',
